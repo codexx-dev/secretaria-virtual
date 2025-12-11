@@ -13,7 +13,7 @@ import LPEditor from "./features/livro-ponto/LPEditor";
 
 function App() {
   const location = useLocation();
-  var routeName = location.pathname.substring(1).toUpperCase().replace('-', ' ');
+  var routeName = location.pathname.substring(1).toUpperCase().replaceAll('-', ' ');
   if(routeName) routeName = ' / ' + routeName;
 
   return (
@@ -33,10 +33,10 @@ function App() {
         </div>
         
         <nav className="text-lg underline flex flex-row gap-5">
-          <a className="ml-auto" href="/">
+          <a className="ml-auto" href="./">
             <ImgIcon src={homeIcon} text={"início"}/>
           </a>
-          <a href="/sobre">
+          <a href="./sobre">
             <ImgIcon src={infoIcon} text={"sobre..."}/>
           </a>
         </nav>
