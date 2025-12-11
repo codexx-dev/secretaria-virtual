@@ -1,6 +1,6 @@
 import ImgIcon from "../components/icons/ImgIcon";
 import bookIcon from "../assets/book_1.svg";
-import idCardIcon from "../assets/Id_card.svg"
+import idCardIcon from "../assets/id_card.svg"
 import busIcon from "../assets/bus.svg"
 import personEditIcon from "../assets/person_edit.svg"
 
