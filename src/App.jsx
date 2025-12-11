@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import LPCreator from "./features/livro-ponto/LPCreator";
@@ -33,12 +33,12 @@ function App() {
         </div>
         
         <nav className="text-lg underline flex flex-row gap-5">
-          <a className="ml-auto" href="./">
+          <Link className="ml-auto" to="/">
             <ImgIcon src={homeIcon} text={"início"}/>
-          </a>
-          <a href="./sobre">
+          </Link>
+          <Link to="/sobre">
             <ImgIcon src={infoIcon} text={"sobre..."}/>
-          </a>
+          </Link>
         </nav>
       </div>
 
