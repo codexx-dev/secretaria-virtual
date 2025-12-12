@@ -10,6 +10,7 @@ import homeIcon from "./assets/home.svg";
 import infoIcon from "./assets/info.svg";
 import ImgIcon from "./components/icons/ImgIcon";
 import LPEditor from "./features/livro-ponto/LPEditor";
+import Page404 from "./pages/Page404";
 
 function App() {
   const location = useLocation();
@@ -48,6 +49,7 @@ function App() {
         <Route path="/livro-ponto" element={<LPCreator/>}/>
         <Route path="/livro-ponto-editor" element={<LPEditor/>}/>
         <Route path="/em-progresso" element={<WorkInProgress/>}/>
+        <Route path="*" element={<Page404/>}/>
       </Routes>
 
     </div>
