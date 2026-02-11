@@ -7,6 +7,7 @@
 
   select, input{
     @apply font-semibold py-1 px-2 rounded-lg cursor-pointer border-2 border-neutral-800 bg-neutral-50
+    disabled:opacity-50;
   }
 
   button{
@@ -27,14 +28,24 @@
   }
 }
 
+@layer utilities {
+  /* .text-vertical{
+    writing-mode: vertical-lr;
+  } */
+}
+
 @media print {
-  .header, .footer {
+  .no-print {
     display: none;
   }
   .paper-waper {
     padding: 0;
     overflow: unset;
     display: block;
+  }
+
+  .paper-waper > * {
+    gap: 0;
   }
   .paper-page {
     scale: 100%;

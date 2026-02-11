@@ -63,3 +63,7 @@ export function getMonthName(month){
 export function pickRandom(arr){
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
+export function verticalTextBr(text){
+  return String(text).split("").join("\n");
+}

@@ -1,4 +1,4 @@
-import EntryDialog from "../../../components/dialogs/EntryDialog";
+import EntryDialog from "../../../../components/dialogs/EntryDialog";
 
 function GotoPageDialog(){
   return (

@@ -1,8 +1,9 @@
+import { twMerge } from "tailwind-merge";
 import santosBrasao from "../../assets/cidade-educadora.png"
 
-function LogoCidadeEduca(){
+function LogoCidadeEduca({className}){
   return(
-    <div className="flex flex-row items-center font-bold font-[Roboto] gap-1">
+    <div className={twMerge("flex flex-row items-center font-bold font-[Roboto] gap-1", className)}>
       <img className="w-12" src={santosBrasao}></img>
       <div className="flex flex-col">
         <span className="text-lg leading-5">Santos</span>

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import PaperPage from "../../components/misc/PaperPage"
-import LPAdmPage from "./misc/LPAdmPage"
-import LPIndice from "./misc/LPIdice";
-import LPCapa from "./misc/LPCapa";
-import LPAbertura from "./misc/LPAbertura";
-import LPFecho from "./misc/LPFecho";
+import LPAdmPage from "./components/misc/LPAdmPage"
+import LPIndice from "./components/misc/LPIdice";
+import LPCapa from "./components/misc/LPCapa";
+import LPAbertura from "./components/misc/LPAbertura";
+import LPFecho from "./components/misc/LPFecho";
 
 function LPEditor(){
   const [numPage, setNumPage] = useState(1);

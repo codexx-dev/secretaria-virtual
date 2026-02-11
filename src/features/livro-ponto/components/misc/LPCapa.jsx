@@ -1,6 +1,6 @@
 import LPFooter from "./LPFooter";
 import LPHead from "./LPHead";
-import { getMonthName } from "../../../utils";
+import { getMonthName } from "../../../../utils";
 
 function LPCapa(){
   const umeName = "ume rural monte cabrão";

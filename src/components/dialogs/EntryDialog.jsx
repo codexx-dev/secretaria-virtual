@@ -1,14 +1,13 @@
 import Modal from "./Modal";
 
 function EntryDialog({open, title, children, onConfirm, onCancel, onClose}){
-  const confirmHandle = ()=>{
-    if(onConfirm) onConfirm();
-    if(onClose) onClose();
+  const handleConfirm = ()=>{
+    onConfirm?.();
   };
 
-  const cancelHandle = ()=>{
-    if(onCancel) onCancel();
-    if(onClose) onClose();
+  const handleCancel = ()=>{
+    onCancel?.();
+    onClose?.();
   };
 
   return (
@@ -17,8 +16,8 @@ function EntryDialog({open, title, children, onConfirm, onCancel, onClose}){
       {children}
 
       <div className="grid grid-cols-2 gap-5 px-10">
-        <button className="sucess-btn" onClick={confirmHandle}>Confirmar</button>
-        <button className="primary-btn" onClick={cancelHandle}>Cancelar</button>
+        <button className="sucess-btn" onClick={handleConfirm}>Confirmar</button>
+        <button className="primary-btn" onClick={handleCancel}>Cancelar</button>
       </div>
 
     </Modal>

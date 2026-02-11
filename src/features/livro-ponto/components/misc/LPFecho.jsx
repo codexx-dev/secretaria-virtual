@@ -1,4 +1,4 @@
-import { getMonthName, usePlural } from "../../../utils";
+import { getMonthName, usePlural } from "../../../../utils";
 import LPFooter from "./LPFooter";
 import LPHead from "./LPHead";
 

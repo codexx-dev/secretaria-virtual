@@ -1,6 +1,6 @@
 import LPFooter from "./LPFooter";
 import LPHead from "./LPHead";
-import { formatNN, getMonthName, usePlural } from "../../../utils";
+import { formatNN, getMonthName, usePlural } from "../../../../utils";
 
 function LPAbertura(){
   const umeName = "UME Rural Monte Cabrão";

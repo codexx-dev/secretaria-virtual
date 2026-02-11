@@ -1,5 +1,5 @@
-import LogoCidadeEduca from "../../../components/icons/LogoCidadeEduca";
-import LogoSantos from "../../../components/icons/LogoSantos";
+import LogoCidadeEduca from "../../../../components/icons/LogoCidadeEduca";
+import LogoSantos from "../../../../components/icons/LogoSantos";
 
 function LPHead({className, title=""}){
   return (

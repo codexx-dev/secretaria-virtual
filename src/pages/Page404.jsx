@@ -18,12 +18,12 @@ function Page404(){
   const objSize = useRef({x:228, y:168});
   const screenSize = useRef({x:1000, y:1000})
 
-  const resizeHandle = ()=> {
+  const handleResize = ()=> {
     screenSize.current.x = document.documentElement.clientWidth;
     screenSize.current.y = document.documentElement.clientHeight;
   };
 
-  const pingPongHandle = ()=>{
+  const handlePingPong = ()=>{
     setPosition({
       x: position.x + direction.x * speed,
       y: position.y + direction.y * speed
@@ -45,14 +45,14 @@ function Page404(){
   }
 
   useEffect(()=>{
-    resizeHandle();
-    window.addEventListener('resize', resizeHandle);
-    return () => {window.removeEventListener('resize', resizeHandle)};
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {window.removeEventListener('resize', handleResize)};
   }, []);
 
   useEffect(()=>{
     const timeOut = setTimeout(()=>{
-      requestAnimationFrame(pingPongHandle);
+      requestAnimationFrame(handlePingPong);
     }, 100);
 
     return () => clearTimeout(timeOut);

@@ -1,7 +1,5 @@
-import { has31Days, getWeekday, getMonthName, getWeekName, isoTime } from "../../../utils"
-import LogoSantos from '../../../components/icons/LogoSantos';
-import LogoCidadeEduca from '../../../components/icons/LogoCidadeEduca';
-import { feriados2025 } from '../feriados2025';
+import { has31Days, getWeekday, getMonthName, getWeekName, isoTime } from "../../../../utils"
+import { feriados2025 } from '../../feriados2025';
 import LPHead from './LPHead';
 
 function LPAdmPage() {
