@@ -23,8 +23,18 @@ function Cracha({empt, info}){
       <div>
         {!empt &&
         <>
-          <h1>{info.ume}</h1>
-          <span className="my-2 text-[10pt]">{"(13) 3352-4991"}</span>
+          {(info.refType === 'escola-total')?
+          (<>
+            <div>
+              <h1>JORNADA AMPLIADA</h1>
+              <h1>{info.ume}</h1>
+            </div>
+            <h1>CARUARA / UACEP</h1>
+          </>):
+          (<>
+            <h1>{info.ume}</h1>
+            <span className="my-2 text-[10pt]">{"(13) 3352-4991"}</span>
+          </>)}
 
           <div className="flex flex-row items-center relative">
             <span className="ml-2 whitespace-break-spaces absolute font-bold text-[14pt] text-red-500">
@@ -81,10 +91,10 @@ function Cracha({empt, info}){
             </ol>
 
             <h2 className="text-left">Telefones:</h2>
-            <span>{info.tel}&nbsp</span>
+            <span>{info.tel} &nbsp; </span>
             <hr/>
             <h2 className="text-left">Responsável:</h2>
-            <span>{info.mainParent}&nbsp</span>
+            <span>{info.mainParent} &nbsp; </span>
             <hr/>
           </div>
         </>}
