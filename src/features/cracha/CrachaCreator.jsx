@@ -58,7 +58,7 @@ function CrachaCreator(){
         ids.push(craha.id);
       }
     });
-    window.open(`/${BASENAME}/imprimir/cracha?ids=${ids.join(',')}`, '', '');
+    window.open(`/${BASENAME}imprimir/cracha/?ids=${ids.join(',')}`, '', '');
   };
   
   const handleChange = (e)=>{

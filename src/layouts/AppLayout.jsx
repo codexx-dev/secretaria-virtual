@@ -19,7 +19,7 @@ function AppLayout(){
           <Link className="ml-auto" to="/">
             <ImgIcon src={homeIcon} text={"início"}/>
           </Link>
-          <Link to="/sobre">
+          <Link to="/sobre/">
             <ImgIcon src={infoIcon} text={"sobre..."}/>
           </Link>
         </nav>

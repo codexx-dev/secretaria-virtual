@@ -15,7 +15,7 @@ function Cat({className}){
     >
       {Array.from({length: count}).map((_, idx)=>{
         return (
-          <div className="bg-neutral-50 w-60 h-80 rounded-lg flex">
+          <div key={idx} className="bg-neutral-50 w-60 h-80 rounded-lg flex">
             <img className="w-80 my-auto" key={idx} src={cat}/>
           </div>
         );

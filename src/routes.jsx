@@ -10,7 +10,7 @@ import CrachaCreator from "./features/cracha/CrachaCreator";
 import CrachaPrint from "./features/cracha/CrachaPint";
 import PrintLayout from "./layouts/PrintLayout";
 
-export const BASENAME = 'secretaria-virtual';
+export const BASENAME = 'secretaria-virtual/';
 
 export const routes = [
   {

@@ -8,7 +8,10 @@ import './index.css'
 hydrateRoot(document.getElementById('root'),
   <StrictMode>
     <RouterProvider router={
-      createBrowserRouter(routes, {basename:BASENAME})
-    } />
+      createBrowserRouter(routes, {
+        hydrationData: window.__STATIC_ROUTER_DATA__,
+        basename:BASENAME
+      })
+    }/>
   </StrictMode>
 );
