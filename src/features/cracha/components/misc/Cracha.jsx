@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import LogoCidadeEduca from "../../../../components/icons/LogoCidadeEduca";
 import LogoSantos from "../../../../components/icons/LogoSantos";
 import { verticalTextBr } from "../../../../utils";
-import { makeEmptCrachaInfo } from "../../stores/crachaStore";
 
 function Cracha({empt, info}){
   const [imgUrl, setImgUrl] = useState();
@@ -32,7 +31,7 @@ function Cracha({empt, info}){
               {verticalTextBr(info.refYear)}
             </span>
 
-            <div className="w-25 h-30 mx-auto border flex items-center">
+            <div className="w-25 h-30 mx-auto border flex items-center overflow-hidden">
               <img src={imgUrl}></img>
             </div>
           </div>
@@ -82,10 +81,11 @@ function Cracha({empt, info}){
             </ol>
 
             <h2 className="text-left">Telefones:</h2>
-            <span>{info.tel}</span>
+            <span>{info.tel}&nbsp</span>
             <hr/>
             <h2 className="text-left">Responsável:</h2>
-            <span>{info.mainParent}</span>
+            <span>{info.mainParent}&nbsp</span>
+            <hr/>
           </div>
         </>}
       </div>
