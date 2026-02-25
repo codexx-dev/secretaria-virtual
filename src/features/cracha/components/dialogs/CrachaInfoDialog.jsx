@@ -4,6 +4,7 @@ import { makeEmptCrachaInfo } from "../../stores/crachaStore";
 
 function CrachaInfoDialog({open=true, id, title, info, onConfirm, onClose}){
   const crachaInfo = useRef(info || makeEmptCrachaInfo());
+  const canvas = useRef(null);
 
   const handleChange = (e)=>{
     const id = e.target.id.split('-').pop();
@@ -15,7 +16,28 @@ function CrachaInfoDialog({open=true, id, title, info, onConfirm, onClose}){
   const handlePikFile = (e)=>{
     const file = e.target.files?.[0];
     if (!file) return;
-    crachaInfo.current.photo = file;
+    
+    const ctx = canvas.current.getContext("2d");
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      img.src = reader.result;
+    };
+
+    img.onload = () => {
+      const w = 100;
+      const h = img.height * (w / img.width);
+      const y = (120 - h) / 2;
+      ctx.drawImage(img, 0, y, w, h);
+
+      canvas.current.toBlob((blob)=>{
+        crachaInfo.current.photo = blob;
+      }, "image/webp", 0.7);
+    };
+
+    reader.readAsDataURL(file);
+
     //degug
     //console.log(crachaInfo.current);
   };
@@ -63,9 +85,12 @@ function CrachaInfoDialog({open=true, id, title, info, onConfirm, onClose}){
 
         <label htmlFor={id+"-name"}>Nome:</label>
         <input id={id+"-name"} onBlur={handleChange}/>
-        
+
         <label htmlFor={id+"-photo"}>Foto:</label>
-        <input id={id+"-photo"} type="file" onChange={handlePikFile}/>
+        <div>
+          <input id={id+"-photo"} type="file" onChange={handlePikFile}/>
+          <canvas className="mx-auto" ref={canvas} width={100} height={120}/>
+        </div>
 
         <label htmlFor={id+"-tel"}>Telefones.:</label>
         <input id={id+"-tel"} type="tel" onBlur={handleChange}/>

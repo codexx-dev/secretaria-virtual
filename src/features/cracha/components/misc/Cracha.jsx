@@ -33,7 +33,7 @@ function Cracha({empt, info}){
           </>):
           (<>
             <h1>{info.ume}</h1>
-            <span className="my-2 text-[10pt]">{"(13) 3352-4991"}</span>
+            <span className="my-2 text-[10pt]">{"(13) 3201-5134"}</span>
           </>)}
 
           <div className="flex flex-row items-center relative">
