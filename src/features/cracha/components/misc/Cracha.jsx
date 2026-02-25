@@ -79,11 +79,13 @@ function Cracha({empt, info}){
                 const list = info.parentList.split(';');
                 let text = '';
                 if(list[0 + idx]) text += String(list[0 + idx]);
-                text += '  ';
-                if(list[7 + idx]) text += String(list[7 + idx]);
+                if(list[7 + idx]){
+                  text += `   /   `;
+                  text += String(list[7 + idx]);
+                }
                 return (
                   <li key={idx}>
-                    <span>{text}</span>
+                    <span className="whitespace-pre">{text}</span>
                     <hr className="ml-3"/>
                   </li>
                 );
