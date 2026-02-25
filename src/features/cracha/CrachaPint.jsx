@@ -36,7 +36,7 @@ function CrachaPrint(){
     <PaperWaper className="py-10 flex overflow-scroll grow">
       <div className="flex flex-col items-center grow gap-5">
         {Array.from({length: Math.ceil(list.length / 4)}).map((_, i)=>
-          <PaperPage key={i} orientation="landscape">
+          <PaperPage key={i} marginBotton="0" marginTop="0" marginLeft="0" marginRight="0" orientation="landscape">
             <div className="h-full flex flex-row items-center justify-around">
 
               {Array.from({length: 4}).map((_, j)=>{

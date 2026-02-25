@@ -18,7 +18,7 @@ function Cracha({empt, info}){
   }, []);
 
   return (
-    <div className="*:w-50 *:h-80 *:px-2 *:border-3 *:text-center *:flex *:flex-col *:gap-2 [&_h1,h2]:font-bold">
+    <div className="[zoom:1.2] *:w-50 *:h-80 *:px-2 *:border-3 *:text-center *:flex *:flex-col *:gap-2 [&_h1,h2]:font-bold">
       
       <div>
         {!empt &&
