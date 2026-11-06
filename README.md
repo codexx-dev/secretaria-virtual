@@ -1,18 +1,32 @@
-# React + Vite
+# SolidStart
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Everything you need to build a Solid project, powered by [`solid-start`](https://start.solidjs.com);
 
-Currently, two official plugins are available:
+## Creating a project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+# create a new project in the current directory
+npm init solid@latest
 
-## React Compiler
+# create a new project in my-app
+npm init solid@latest my-app
+```
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## Developing
 
-Note: This will impact Vite dev & build performances.
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-## Expanding the ESLint configuration
+```bash
+npm run dev
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
+
+## Building
+
+Solid apps are built with Nitro _presets_, which optimise your project for deployment to different environments.
+
+By default, `npm run build` will generate a Node app under `.output` that you can run with `npm start`. To use a different preset, set it on the `nitro()` plugin in your `vite.config.ts`.
+
+## This project was created with the [Solid CLI](https://github.com/solidjs-community/solid-cli)
