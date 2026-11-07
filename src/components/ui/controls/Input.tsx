@@ -1,8 +1,9 @@
 
 import { splitProps, type JSX } from "solid-js";
 import { twMerge } from "tailwind-merge";
+import { useField } from "~/components/forms/Field";
 
-type TextInputProps = JSX.InputHTMLAttributes<HTMLInputElement> & {
+type InputProps = JSX.InputHTMLAttributes<HTMLInputElement> & {
   //nada ;)
 }
 
@@ -11,14 +12,16 @@ const baseClass =
   "placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 " +
   "focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:bg-gray-100";
 
-export function TextInput(props: TextInputProps) {
-  const [local, rest] = splitProps(props, ["class"]);
+export function Input(props: InputProps) {
+  const [local, rest] = splitProps(props, ["class", "id"]);
+  const field = useField();
 
   return (
     <input
       type="text"
-      class={twMerge(baseClass, local.class ?? '')}
       {...rest}
+      id={local.id ?? field?.id}
+      class={twMerge(baseClass, local.class ?? '')}
     />
   );
 }

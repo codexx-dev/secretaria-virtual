@@ -16,12 +16,12 @@ export default function Button(props: ButtonProps) {
 
   return (
     <button
+      {...rest}
       class={twMerge(
         `inline-flex items-center justify-center rounded-lg
         px-4 py-2.5 text-sm font-semibold transition focus:outline-none
         focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed
         disabled:opacity-60 ${variants[local.variant ?? "primary"]}`, local.class ?? "")}
-      {...rest}
     >
       {local.children}
     </button>

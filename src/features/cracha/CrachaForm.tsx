@@ -1,9 +1,10 @@
 import { createSignal, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import Button from "~/components/Button";
-import { EditableSelect } from "~/components/forms/EditableSelect";
-import { FileInput } from "~/components/forms/FileInput";
-import { TextInput } from "~/components/forms/TextInput";
+import { Field } from "~/components/forms/Field";
+import Button from "~/components/ui/Button";
+import { EditableSelect } from "~/components/ui/controls/EditableSelect";
+import { FileInput } from "~/components/ui/controls/FileInput";
+import { Input } from "~/components/ui/controls/Input";
 
 type CrachaFormValues = {
   nome: string;
@@ -43,86 +44,59 @@ export default function CrachaForm(props: CrachaFormProps) {
   return (
     <form onSubmit={handleSubmit} class="mx-auto flex w-full max-w-lg flex-col gap-5" novalidate>
       
-      <div class="flex flex-col gap-1.5">
-        <label for="ume" class="text-sm font-medium text-gray-700">
-          Escola
-        </label>
+      <Field label="Escola">
         <EditableSelect
-          id="ume"
           options={["test1", "test2"]}
         />
-      </div>
+      </Field>
       
-      <div class="flex flex-col gap-1.5">
-        <label for="nome" class="text-sm font-medium text-gray-700">
-          Nome
-        </label>
-        <TextInput
-          id="nome"
+      <Field label="Nome">
+        <Input
           placeholder="Maria da Silva"
           value={values.nome}
           onInput={(e) => setValues("nome", e.currentTarget.value)}
         />
-      </div>
+      </Field>
  
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div class="flex flex-col gap-1.5">
-          <label for="sala" class="text-sm font-medium text-gray-700">
-            Sala
-          </label>
-          <TextInput
-            id="sala"
+
+        <Field label="Sala">
+          <Input
             placeholder="1º ANO"
             value={values.cargo}
             onInput={(e) => setValues("cargo", e.currentTarget.value)}
           />
-        </div>
+        </Field>
  
-        <div class="flex flex-col gap-1.5">
-          <label for="ano" class="text-sm font-medium text-gray-700">
-            Ano
-          </label>
-          <TextInput
-            id="ano"
+        <Field label="Ano">
+          <Input
             placeholder="2026"
             value={values.setor}
             onInput={(e) => setValues("setor", e.currentTarget.value)}
           />
-        </div>
+        </Field>
       </div>
  
-      <div class="flex flex-col gap-1.5">
-        <label for="telefone" class="text-sm font-medium text-gray-700">
-          Telefone
-        </label>
-        <TextInput
-          id="telefone"
+      <Field label="Telefone">
+        <Input
           inputmode="numeric"
           placeholder="000123"
           value={values.matricula}
           onInput={(e) => setValues("matricula", e.currentTarget.value)}
         />
-      </div>
+      </Field>
 
-      <div class="flex flex-col gap-1.5">
-        <label for="responsavel" class="text-sm font-medium text-gray-700">
-          Responsável
-        </label>
-        <TextInput
-          id="responsavel"
+      <Field label="Responsável">
+        <Input
           placeholder="Maria da Silva"
         />
-      </div>
+      </Field>
 
-      <div class="flex flex-col gap-1.5">
-        <label for="autorizados" class="text-sm font-medium text-gray-700">
-          Autorizados
-        </label>
-        <TextInput
-          id="autorizados"
+      <Field label="Autorizados">
+        <Input
           placeholder="José; Débora; Gabriel"
         />
-      </div>
+      </Field>
  
 
       <div class="flex items-center gap-4">
@@ -135,7 +109,6 @@ export default function CrachaForm(props: CrachaFormProps) {
           </Show>
         </div>
         <FileInput
-          id="foto"
           accept="image/*"
           onChange={handleFoto}
         />

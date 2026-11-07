@@ -3,6 +3,7 @@ import Button from "../Button";
 import { twMerge } from "tailwind-merge";
 import EditIcon from "~/assets/edit.svg";
 import AddIcon  from "~/assets/add.svg";
+import { useField } from "~/components/forms/Field";
 
 type EditableSelectProps = JSX.SelectHTMLAttributes<HTMLSelectElement> & {
   options?: Array<string>
@@ -17,6 +18,7 @@ export function EditableSelect (props: EditableSelectProps){
   const [local, rest] = splitProps(props, ["class", "id"]);
   const [options, setOptions] = createSignal([...props.options ?? '']);
   const [isOpen, setIsOpen] = createSignal(false);
+  const field = useField();
 
   return (
     <div class={twMerge("relative w-full text-sm", local.class)}
@@ -27,7 +29,7 @@ export function EditableSelect (props: EditableSelectProps){
       }}
     >
       <button
-        id={local.id}
+        id={local.id ?? field?.id}
         class={baseClass + "flex justify-between"}
         disabled={props.disabled}
         aria-expanded={isOpen()}
