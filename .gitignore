@@ -1,4 +1,5 @@
 dist
+build
 .wrangler
 .output
 .vercel

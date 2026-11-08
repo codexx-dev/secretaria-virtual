@@ -16,3 +16,22 @@ body {
   background: rgb(var(--background-rgb));
   color: rgb(var(--foreground-rgb));
 } */
+
+@layer components {
+  span,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    cursor: default;
+  }
+
+  button,
+  input[type="checkbox"],
+  select,
+  a {
+    cursor: pointer;
+  }
+}
