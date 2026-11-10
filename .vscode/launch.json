@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug servidor (gdb)",
+      "name": "Debug server (gdb)",
       "type": "cppdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
