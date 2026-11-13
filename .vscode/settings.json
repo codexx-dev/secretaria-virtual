@@ -1,6 +1,7 @@
 {
   "cmake.sourceDirectory": "${workspaceFolder}/native",
-  
+  "C_Cpp.default.compilerPath": "C:/msys64/clang64/bin/clang++.exe",
+
   "cmake.debugConfig": {
     "type": "cppdbg",
     "MIMode": "gdb",
