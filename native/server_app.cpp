@@ -39,8 +39,10 @@ bool ServerApp::start()
     //checar se o caminho é valido
     //if()
     //salvar arquivo
-    const bool ok = write_line(path, data);
-    res.status = ok ? 200 : 500;
+    //TODO: usar DB::insert_val (write_line foi removida de utils)
+    (void)path;
+    (void)data;
+    res.status = 501;   // nao implementado
   });
 
   ////
