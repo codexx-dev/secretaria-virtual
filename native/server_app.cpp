@@ -7,7 +7,7 @@
 bool ServerApp::start()
 {
   //obter caminho do config
-  m_data_dir = fs::path("C::\\\\Secretaria Vistual"); //test
+  m_data_dir = fs::path(L"C:\\Secretaria Virtual"); //test
 
   //configura routes
   m_svr.Get("/ping", [](const httplib::Request &, httplib::Response &res) 
@@ -25,7 +25,8 @@ bool ServerApp::start()
     //checar se o caminho é valido
     //if()
     //salvar arquivo
-    write_byte(path, data);
+    const bool ok = write_byte(path, data);
+    res.status = ok ? 200 : 500;
   });
 
   m_svr.Post( "/save-info", [this](const httplib::Request &req, httplib::Response &res)
@@ -38,7 +39,8 @@ bool ServerApp::start()
     //checar se o caminho é valido
     //if()
     //salvar arquivo
-    write_line(path, data);
+    const bool ok = write_line(path, data);
+    res.status = ok ? 200 : 500;
   });
 
   ////
