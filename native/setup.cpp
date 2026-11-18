@@ -1,25 +1,26 @@
 #include "setup.h"
+#include "utils.h"
+
 #include <filesystem>
 #include <iostream>
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 
-Setup::Setup()
-{
-  const wchar_t* appdata = _wgetenv(L"APPDATA");
-  if (!appdata)
-  {
-    std::cout << "APPDATA nao foi encontrado. O app nao pode ser instalado." << std::endl;
-    return;
-  }
-  m_install_dir = fs::path(appdata) / L"SecretariaVirtual";
-}
 
 //retorna false apeanas se a instalação falhar
 bool Setup::install()
 {
-  if(m_install_dir.empty())
+  fs::path install_dir = get_install_dir(); 
+
+  if(install_dir.empty())
   {
-    std::cout << "APPDATA nao foi encontrado. O app nao pode ser instalado." << std::endl;
+    std::cout << "Diretorio de instalacao nao foi encontrado. O app nao pode ser instalado." << std::endl;
     return false;
   }
 
@@ -33,7 +34,7 @@ bool Setup::install()
     return false;
   }
   
-  const fs::path dst = m_install_dir / EXE_NAME;
+  const fs::path dst = install_dir / EXE_NAME;
   const fs::path src = buf;
   std::error_code ec;
 
@@ -43,7 +44,7 @@ bool Setup::install()
   }
   ec.clear();
   
-  fs::create_directories(m_install_dir, ec);
+  fs::create_directories(install_dir, ec);
   if (ec)
   {
     std::cout 
@@ -81,7 +82,13 @@ bool Setup::install()
 
 bool Setup::uninstall()
 {
-  if (m_install_dir.empty()) return false;
+  fs::path install_dir = get_install_dir(); 
+
+  if(install_dir.empty())
+  {
+    std::cout << "Diretorio de instalacao nao foi encontrado. O app nao pode ser desinstalado." << std::endl;
+    return false;
+  }
 
   LSTATUS r = RegDeleteKeyValueW(HKEY_CURRENT_USER, RUN_KEY, RUN_NAME);
   if (r != ERROR_SUCCESS && r != ERROR_FILE_NOT_FOUND)
@@ -92,7 +99,7 @@ bool Setup::uninstall()
   }
 
   std::error_code ec;
-  fs::remove_all(m_install_dir, ec);
+  fs::remove_all(install_dir, ec);
   if (ec)
   {
     std::cout << "Nao foi possivel remover o diretorio de instalacao." << "\n"

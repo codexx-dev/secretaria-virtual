@@ -1,55 +1,87 @@
 #include "server_app.h"
 #include "utils.h"
-#include <filesystem>
-#include <string_view>
 
+#include <filesystem>
+#include <io.h>
+#include <rapidjson/document.h>
+
+namespace json = rapidjson;
+namespace 
+{
+  inline constexpr char IP[] = "127.0.0.1";
+  inline constexpr int DEFAULT_PORT = 8080;
+}  // namespace
 
 bool ServerApp::start()
-{
-  //obter caminho do config
-  m_data_dir = fs::path(L"C:\\Secretaria Virtual"); //test
+{ 
+  fs::path data_dir =  get_data_dir();
 
-  //configura routes
-  m_svr.Get("/ping", [](const httplib::Request &, httplib::Response &res) 
+  if (data_dir.empty())
   {
-    res.set_content("pong", "text/plain");
+    std::cout << "A pasta de Dados nao foi encontrado. O app nao pode ser iniciado." << std::endl;
+    return false;
+  }
+
+  ////////////////////
+  // configura routes
+  ////////////////////
+
+  m_svr.Get("/api/ping", [](const httplib::Request &, httplib::Response &res) 
+  {
+    res.set_content("pong", "text/plain"); //test
   });
 
-  m_svr.Post( "/save-img", [this](const httplib::Request &req, httplib::Response &res)
+  //dados
+  /////////
+
+  m_svr.Get( "/api/dados", [this](const httplib::Request &req, httplib::Response &res)
   {
-    //path form req.body
-    fs::path path = m_data_dir / L"teste";
-    //data from req.body
-    std::string_view data;
+    json::Document req_body;
+    req_body.Parse(req.body);
 
-    //checar se o caminho é valido
-    //if()
-    //salvar arquivo
-    const bool ok = write_byte(path, data);
-    res.status = ok ? 200 : 500;
-  });
+    fs::path data_src(req_body["src"].GetString());
+    std::vector<char> data_arr;
+    if(!read_bytes(data_src, data_arr))
+    {
+      auto err = create_http_eror("Não foi possivel acessar o caminho especificado.");
+      res.set_content(err, "application/json");
+      res.status = 500;
+    }
 
-  m_svr.Post( "/save-info", [this](const httplib::Request &req, httplib::Response &res)
-  {
-    //path form req.body
-    fs::path path = m_data_dir / L"teste";
-    //data from req.body
-    std::string_view data;
-
-    //checar se o caminho é valido
-    //if()
-    //salvar arquivo
-    //TODO: usar DB::insert_val (write_line foi removida de utils)
-    (void)path;
-    (void)data;
     res.status = 501;   // nao implementado
   });
 
-  ////
+  m_svr.Post( "/api/dados", [this](const httplib::Request &req, httplib::Response &res)
+  {
+    res.status = 501;   // nao implementado
+  });
 
-  if (!m_svr.bind_to_port(m_ip, m_port)) return false;
-  // porta ocupada, IP inválido etc.
+  m_svr.Delete( "/api/dados", [this](const httplib::Request &req, httplib::Response &res)
+  {
+    res.status = 501;   // nao implementado
+  });
 
+  //configurações
+  /////////
+
+  m_svr.Get( "/api/configuracao", [this](const httplib::Request &req, httplib::Response &res)
+  {
+    res.status = 501;   // nao implementado
+  });
+
+  m_svr.Post( "/api/configuracao", [this](const httplib::Request &req, httplib::Response &res)
+  {
+    res.status = 501;   // nao implementado
+  });
+
+  //
+  ////////
+
+  if (!m_svr.bind_to_port(IP, DEFAULT_PORT))
+  {
+    std::cout << "Porta ocupada. O app nao pode ser iniciado." << std::endl;
+    return false;
+  }
   m_thread = std::thread([this] { m_svr.listen_after_bind(); });
 
   return true;

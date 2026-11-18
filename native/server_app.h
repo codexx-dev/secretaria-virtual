@@ -1,22 +1,22 @@
 #pragma once
 
 #include <httplib.h>
-#include <filesystem>
-
-namespace fs = std::filesystem;
+#include <string>
 
 class ServerApp
 {
 private:
-  std::string m_ip;
-  int m_port;
-
   std::thread m_thread;
   httplib::Server m_svr;
-  fs::path m_data_dir;
+
+inline std::string create_http_eror(const std::string& message){
+  return "{\"err\":\""+ message +"\"}";
+}
+  
 
 public:
-  ServerApp (const char* ip, int port): m_ip(ip), m_port(port) { }
+  ServerApp () = default;
+  ~ServerApp() { stop(); }
 
   bool start();
   void stop();

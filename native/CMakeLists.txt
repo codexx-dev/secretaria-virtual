@@ -24,6 +24,18 @@ FetchContent_Declare(httplib_win10
 )
 FetchContent_MakeAvailable(httplib_win8 httplib_win10)
 
+# ----------------------------------------------------------------------------
+# rapidjson: só headers. A última release (v1.1.0, 2016) não compila nos
+# compiladores atuais, então fixamos um commit do master.
+# SOURCE_SUBDIR aponta para uma pasta inexistente para o CMake só baixar,
+# sem rodar o CMakeLists da lib (antigo, quebra no CMake 4 e compila testes).
+# ----------------------------------------------------------------------------
+FetchContent_Declare(rapidjson
+  URL https://github.com/Tencent/rapidjson/archive/297637bc0a0f00dc504dbc1a47ebdaa577f8ae19.tar.gz
+  SOURCE_SUBDIR _none
+)
+FetchContent_MakeAvailable(rapidjson)
+
 set(NAT_COMP_SOURCES main.cpp server_app.cpp setup.cpp utils.cpp locked_file.cpp csv_file.cpp db.cpp)
 
 # Ícone do executável (compartilhado pelos dois alvos).
@@ -38,11 +50,13 @@ set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/app.rc PROPERTIES
 #   winnt       : versão mínima do Windows (_WIN32_WINNT)
 function(add_nat_comp target httplib_dir winnt)
   add_executable(${target} ${NAT_COMP_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/app.rc)
-  target_include_directories(${target} PRIVATE ${httplib_dir})
+  target_include_directories(${target} PRIVATE ${httplib_dir} ${rapidjson_SOURCE_DIR}/include)
   # Restringe os headers do Windows às APIs disponíveis na versão alvo.
+  # RAPIDJSON_HAS_STDSTRING: permite usar std::string direto com o rapidjson.
   target_compile_definitions(${target} PRIVATE
     _WIN32_WINNT=${winnt}
     WINVER=${winnt}
+    RAPIDJSON_HAS_STDSTRING=1
   )
   target_link_libraries(${target} PRIVATE ws2_32)
 

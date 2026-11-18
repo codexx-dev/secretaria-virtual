@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
 #include <string>
 #include <string_view>
@@ -33,3 +34,11 @@ bool wide_to_utf8(std::wstring_view in, std::string& out);
 
 // Texto em uma pagina de codigo (ex.: 1252, o "ANSI" do Excel pt-BR) -> UTF-8.
 bool codepage_to_utf8(std::string_view in, unsigned codepage, std::string& out);
+
+
+//
+//
+//
+
+fs::path get_install_dir();
+fs::path get_data_dir();

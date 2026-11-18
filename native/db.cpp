@@ -155,7 +155,7 @@ DbStatus DB::resolve(std::string_view name, fs::path& out) const
     if (pos == std::string_view::npos) break;
     start = pos + 1;
   }
-  path += L".csv";
+  path += ".csv";
 
   if (path.native().size() >= MAX_PATH_LEN) return DbStatus::InvalidName;
 

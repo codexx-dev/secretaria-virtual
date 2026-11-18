@@ -1,8 +1,10 @@
 #include "utils.h"
 
 #include <climits>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -45,7 +47,7 @@ bool write_byte(const fs::path& path, std::string_view data)
   if (!ensure_parent_dir(path)) return false;
 
   fs::path tmp = path;
-  tmp += L".tmp";
+  tmp += ".tmp";
 
   {
     std::ofstream out(tmp, std::ios::binary | std::ios::trunc);
@@ -176,4 +178,19 @@ bool codepage_to_utf8(std::string_view in, unsigned codepage, std::string& out)
   if (MultiByteToWideChar(codepage, 0, in.data(), len, wide.data(), n) != n) return false;
 
   return wide_to_utf8(wide, out);
+}
+
+//
+//
+//
+fs::path get_install_dir(){
+  const wchar_t* appdata = _wgetenv(L"APPDATA");
+  if(!appdata) return fs::path();
+  return fs::path(appdata) / "SecretariaVirtual";
+}
+
+fs::path get_data_dir(){
+  const wchar_t* user_prof = _wgetenv(L"USERPROFILE");
+  if(!user_prof) return fs::path();
+  return fs::path(user_prof) / "Documents" / "SecretariaVirtual";
 }
