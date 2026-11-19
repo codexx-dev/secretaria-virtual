@@ -1,5 +1,4 @@
 #include "db.h"
-#include "csv_file.h"
 #include "utils.h"
 
 #include <algorithm>
@@ -107,6 +106,12 @@ const char* db_status_message(DbStatus st)
     case DbStatus::BadFormat:      return "O arquivo .csv esta corrompido ou em formato invalido.";
   }
   return "Erro desconhecido.";
+}
+
+DbStatus DB::read(const fs::path& path, CsvTable& out)
+{
+  CsvFile file;
+  return open_table(path, OpenMode::Existing, file, out);
 }
 
 DbStatus DB::create(const fs::path& path, const std::vector<std::string>& columns)

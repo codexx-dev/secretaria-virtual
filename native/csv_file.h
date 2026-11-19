@@ -70,3 +70,6 @@ public:
   static CsvStatus parse(std::string_view utf8, CsvTable& out);
   static std::string serialize(const CsvTable& table);
 };
+
+// Tabela -> JSON: [{"coluna": "valor", ...}, ...], uma entrada por linha.
+std::string csv_to_json(const CsvTable& table);

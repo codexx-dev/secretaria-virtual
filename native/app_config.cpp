@@ -76,8 +76,29 @@ void AppConfig::load()
     m_user = doc[KEY_USER].GetString();
 }
 
-void AppConfig::save() const
+bool AppConfig::update(const fs::path& data_dir, int port, const std::string& user)
 {
+  std::lock_guard<std::mutex> lock(m_mutex);
+
+  const fs::path old_data_dir = m_data_dir;
+  const int old_port = m_port;
+  const std::string old_user = m_user;
+
+  m_data_dir = data_dir;
+  m_port = port;
+  m_user = user;
+  if (save()) return true;
+
+  m_data_dir = old_data_dir;   // arquivo nao gravado: memoria volta ao que era
+  m_port = old_port;
+  m_user = old_user;
+  return false;
+}
+
+bool AppConfig::save() const
+{
+  if (m_file.empty()) return false;
+
   json::StringBuffer buf;
   json::PrettyWriter<json::StringBuffer> writer(buf);
   writer.StartObject();
@@ -89,5 +110,5 @@ void AppConfig::save() const
   writer.String(m_user);
   writer.EndObject();
 
-  write_byte(m_file, std::string_view(buf.GetString(), buf.GetSize()));
+  return write_byte(m_file, std::string_view(buf.GetString(), buf.GetSize()));
 }

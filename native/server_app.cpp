@@ -1,15 +1,13 @@
 #include "server_app.h"
 #include "app_config.h"
-#include "utils.h"
+#include "server_routes.h"
 
-#include <filesystem>
-#include <rapidjson/document.h>
+#include <iostream>
 
-namespace json = rapidjson;
 namespace
 {
-  inline constexpr char IP[] = "127.0.0.1";
-}  // namespace
+  constexpr char IP[] = "127.0.0.1";
+}
 
 bool ServerApp::start()
 {
@@ -21,62 +19,7 @@ bool ServerApp::start()
     return false;
   }
 
-  ////////////////////
-  // configura routes
-  ////////////////////
-
-  m_svr.Get("/api/ping", [](const httplib::Request &, httplib::Response &res) 
-  {
-    res.set_content("pong", "text/plain"); //test
-  });
-
-  /////////
-  // Dados
-  /////////
-
-  m_svr.Get( "/api/dados", [this](const httplib::Request &req, httplib::Response &res)
-  {
-    json::Document req_body;
-    req_body.Parse(req.body);
-
-    fs::path data_src(req_body["src"].GetString());
-    std::vector<char> data_arr;
-    if(!read_bytes(data_src, data_arr))
-    {
-      auto err = create_http_eror("Não foi possivel acessar o caminho especificado.");
-      res.set_content(err, "application/json");
-      res.status = 500;
-    }
-
-    res.status = 501;   // nao implementado
-  });
-
-  m_svr.Post( "/api/dados", [this](const httplib::Request &req, httplib::Response &res)
-  {
-    res.status = 501;   // nao implementado
-  });
-
-  m_svr.Delete( "/api/dados", [this](const httplib::Request &req, httplib::Response &res)
-  {
-    res.status = 501;   // nao implementado
-  });
-
-  /////////
-  // Configurações
-  /////////
-
-  m_svr.Get( "/api/configuracao", [this](const httplib::Request &req, httplib::Response &res)
-  {
-    res.status = 501;   // nao implementado
-  });
-
-  m_svr.Post( "/api/configuracao", [this](const httplib::Request &req, httplib::Response &res)
-  {
-    res.status = 501;   // nao implementado
-  });
-
-  //
-  ////////
+  register_routes(m_svr);
 
   if (!m_svr.bind_to_port(IP, config.port()))
   {

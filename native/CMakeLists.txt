@@ -42,6 +42,7 @@ set(NAT_COMP_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/app_config.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/server_app.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/server_routes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/setup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/csv_file.cpp

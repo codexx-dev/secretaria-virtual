@@ -3,6 +3,9 @@
 
 #include <algorithm>
 
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+
 namespace
 {
   constexpr std::string_view BOM = "\xEF\xBB\xBF";
@@ -224,4 +227,25 @@ std::string CsvFile::serialize(const CsvTable& table)
   append_row(out, table.header);
   for (const CsvRow& row : table.rows) append_row(out, row);
   return out;
+}
+
+std::string csv_to_json(const CsvTable& table)
+{
+  rapidjson::StringBuffer buf;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+
+  writer.StartArray();
+  for (const CsvRow& row : table.rows)
+  {
+    writer.StartObject();
+    for (size_t i = 0; i < table.header.size(); ++i)
+    {
+      writer.Key(table.header[i]);
+      writer.String(row[i]);
+    }
+    writer.EndObject();
+  }
+  writer.EndArray();
+
+  return std::string(buf.GetString(), buf.GetSize());
 }

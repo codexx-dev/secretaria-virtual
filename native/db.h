@@ -1,5 +1,7 @@
 #pragma once
 
+#include "csv_file.h"
+
 #include <filesystem>
 #include <string>
 #include <utility>
@@ -38,6 +40,9 @@ const char* db_status_message(DbStatus st);
 class DB
 {
 public:
+  // Le a tabela inteira.
+  static DbStatus read(const fs::path& path, CsvTable& out);
+
   // Cria a tabela so com o cabecalho.
   static DbStatus create(const fs::path& path, const std::vector<std::string>& columns);
 
