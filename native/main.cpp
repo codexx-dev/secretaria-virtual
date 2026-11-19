@@ -1,4 +1,4 @@
-#include "app_config.h"
+#include "server_config.h"
 #include "platform/platform.h"
 #include "platform/sys_tray.h"
 #include "server_app.h"
@@ -21,7 +21,7 @@ int main()
 
   std::cout << "Use o icone da bandeja para reiniciar ou encerrar." << std::endl;
 
-  const SysTray::Action action = SysTray::run(AppConfig::get_instance().file());
+  const SysTray::Action action = SysTray::run(ServerConfig::get_instance().file());
 
   server.stop();   // libera a porta antes de a nova instancia subir
   if (action == SysTray::Action::Restart) start_new_instance();

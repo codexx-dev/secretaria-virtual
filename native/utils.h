@@ -23,7 +23,7 @@ bool erase(const fs::path& path);
 bool read_bytes(const fs::path& path, std::vector<char>& out);
 
 // ----------------------------------------------------------------------------
-// Caminhos dentro da pasta de dados (AppConfig)
+// Caminhos dentro da pasta de dados (ServerConfig)
 // ----------------------------------------------------------------------------
 
 // true se "path" esta DENTRO da pasta de dados (a propria pasta nao conta).

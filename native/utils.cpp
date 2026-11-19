@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "app_config.h"
+#include "server_config.h"
 
 #include <filesystem>
 #include <fstream>
@@ -129,7 +129,7 @@ bool read_bytes(const fs::path& path, std::vector<char>& out)
 
 bool is_inside_data_dir(const fs::path& path)
 {
-  const fs::path data_dir = AppConfig::get_instance().data_dir();
+  const fs::path data_dir = ServerConfig::get_instance().data_dir();
   if (data_dir.empty() || path.empty()) return false;
 
   std::error_code ec;

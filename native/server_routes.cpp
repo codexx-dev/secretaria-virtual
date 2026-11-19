@@ -1,5 +1,5 @@
 #include "server_routes.h"
-#include "app_config.h"
+#include "server_config.h"
 #include "db.h"
 
 #include <cstdlib>
@@ -48,7 +48,7 @@ namespace
   // "PASTA/NOME" (UTF-8) -> <pasta de dados>/PASTA/NOME.csv
   fs::path table_path(const std::string& src)
   {
-    fs::path path = AppConfig::get_instance().data_dir() / fs::u8path(src);
+    fs::path path = ServerConfig::get_instance().data_dir() / fs::u8path(src);
     path += ".csv";
     return path;
   }
@@ -179,7 +179,7 @@ namespace
   // {"data": "...", "port": 8080, "user": "..."}
   void send_config(httplib::Response& res)
   {
-    const AppConfig& config = AppConfig::get_instance();
+    const ServerConfig& config = ServerConfig::get_instance();
 
     json::StringBuffer buf;
     json::Writer<json::StringBuffer> writer(buf);
@@ -202,48 +202,33 @@ namespace
   }
 
   // POST /api/configuracao  {"data": "...", "port": 8080, "user": "..."}
-  // Cada chave e opcional: a que faltar mantem o valor atual. A porta nova so
-  // vale depois de reiniciar o app.
+  // Cada chave e opcional: a que faltar mantem o valor atual. A validacao e a
+  // gravacao ficam na ServerConfig; aqui so se le o JSON.
   void post_config(const httplib::Request& req, httplib::Response& res)
   {
     json::Document body;
     if (!parse_json(req, res, body)) return;
 
-    AppConfig& config = AppConfig::get_instance();
+    ServerConfig& config = ServerConfig::get_instance();
     fs::path data_dir = config.data_dir();
     int port = config.port();
     std::string user = config.user();
 
-    if (body.HasMember("data"))
-    {
-      const json::Value& v = body["data"];
-      std::error_code ec;
-      if (!v.IsString() || v.GetStringLength() == 0 || !fs::is_directory(fs::u8path(v.GetString()), ec))
-        return send_error(res, 400, "\"data\" deve ser uma pasta existente.");
-      data_dir = fs::u8path(v.GetString());
-    }
+    // Tipo errado vira valor vazio/zero, que a ServerConfig recusa.
+    if (const auto it = body.FindMember("data"); it != body.MemberEnd())
+      data_dir = it->value.IsString() ? fs::u8path(it->value.GetString()) : fs::path();
 
-    if (body.HasMember("port"))
-    {
-      const json::Value& v = body["port"];
-      int value = 0;
-      if (v.IsInt()) value = v.GetInt();
-      else if (v.IsString()) value = std::atoi(v.GetString());   // aceita "8080"
-      if (value <= 0 || value > 65535)
-        return send_error(res, 400, "\"port\" deve ser um numero entre 1 e 65535.");
-      port = value;
-    }
+    if (const auto it = body.FindMember("port"); it != body.MemberEnd())
+      port = it->value.IsInt()    ? it->value.GetInt()
+           : it->value.IsString() ? std::atoi(it->value.GetString())   // aceita "8080"
+           : 0;
 
-    if (body.HasMember("user"))
-    {
-      const json::Value& v = body["user"];
-      if (!v.IsString() || v.GetStringLength() == 0)
-        return send_error(res, 400, "\"user\" deve ser um texto nao vazio.");
-      user = v.GetString();
-    }
+    if (const auto it = body.FindMember("user"); it != body.MemberEnd())
+      user = it->value.IsString() ? it->value.GetString() : "";
 
-    if (!config.update(data_dir, port, user))
-      return send_error(res, 500, "Nao foi possivel gravar o arquivo de configuracao.");
+    const ServerConfig::Error err = config.update(data_dir, port, user);
+    if (err == ServerConfig::Error::SaveFailed) return send_error(res, 500, ServerConfig::error_message(err));
+    if (err != ServerConfig::Error::None)       return send_error(res, 400, ServerConfig::error_message(err));
 
     send_config(res);
   }

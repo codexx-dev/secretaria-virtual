@@ -32,7 +32,7 @@ enum class DbStatus
 const char* db_status_message(DbStatus st);
 
 // "Banco de dados" de arquivos .csv. Cada tabela e um arquivo dentro de
-// AppConfig::data_dir(); caminho fora dela -> InvalidName.
+// ServerConfig::data_dir(); caminho fora dela -> InvalidName.
 //
 // Nao ha chave: a linha inteira identifica a si mesma. Toda linha precisa
 // trazer todas as colunas do cabecalho, e a comparacao ignora espacos nas
