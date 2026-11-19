@@ -36,42 +36,36 @@ FetchContent_Declare(rapidjson
 )
 FetchContent_MakeAvailable(rapidjson)
 
-set(NAT_COMP_SOURCES main.cpp server_app.cpp setup.cpp utils.cpp locked_file.cpp csv_file.cpp db.cpp)
+# Codigo portavel (raiz de native/). Caminhos absolutos: a plataforma monta os
+# alvos em outro diretorio.
+set(NAT_COMP_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/app_config.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/server_app.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/setup.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/csv_file.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/db.cpp
+)
 
-# Ícone do executável (compartilhado pelos dois alvos).
+# Definicoes comuns a todas as plataformas.
+set(NAT_COMP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${rapidjson_SOURCE_DIR}/include)
+set(NAT_COMP_DEFINITIONS RAPIDJSON_HAS_STDSTRING=1)   # std::string direto no rapidjson
+
+# Icone do executavel (public/ do frontend).
 set(ICON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../public/favicon.ico)
-configure_file(app.rc.in ${CMAKE_CURRENT_BINARY_DIR}/app.rc @ONLY)
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/app.rc PROPERTIES
-  OBJECT_DEPENDS ${ICON_PATH})
 
-# Cria um alvo do componente nativo.
-#   target      : nome do alvo/executável
-#   httplib_dir : pasta com o httplib.h a usar
-#   winnt       : versão mínima do Windows (_WIN32_WINNT)
-function(add_nat_comp target httplib_dir winnt)
-  add_executable(${target} ${NAT_COMP_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/app.rc)
-  target_include_directories(${target} PRIVATE ${httplib_dir} ${rapidjson_SOURCE_DIR}/include)
-  # Restringe os headers do Windows às APIs disponíveis na versão alvo.
-  # RAPIDJSON_HAS_STDSTRING: permite usar std::string direto com o rapidjson.
-  target_compile_definitions(${target} PRIVATE
-    _WIN32_WINNT=${winnt}
-    WINVER=${winnt}
-    RAPIDJSON_HAS_STDSTRING=1
-  )
-  target_link_libraries(${target} PRIVATE ws2_32)
+# ----------------------------------------------------------------------------
+# Plataforma: native/platform/<pasta>/ implementa o que esta em platform.h e
+# locked_file.h, e define os alvos (cada plataforma sabe como monta os seus).
+# ----------------------------------------------------------------------------
+if(WIN32)
+  set(NAT_COMP_PLATFORM win)
+else()
+  message(FATAL_ERROR "Plataforma sem suporte: ${CMAKE_SYSTEM_NAME}")
+endif()
 
-  # Linkagem estática: embute a runtime do C++ (libc++/libstdc++, libunwind,
-  # winpthread) no exe, para não depender de DLLs que não vêm com o Windows.
-  if(MSVC)
-    set_property(TARGET ${target} PROPERTY
-      MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-  else()
-    target_link_options(${target} PRIVATE -static)
-  endif()
-endfunction()
+# Executaveis na raiz do build, independente da pasta da plataforma.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# 1) Windows 8   (_WIN32_WINNT_WIN8  = 0x0602)
-add_nat_comp(nat_comp_win8  ${httplib_win8_SOURCE_DIR}  0x0602)
-
-# 2) Windows 10 e 11 (_WIN32_WINNT_WIN10 = 0x0A00)
-add_nat_comp(nat_comp_win10 ${httplib_win10_SOURCE_DIR} 0x0A00)
+add_subdirectory(platform/${NAT_COMP_PLATFORM})

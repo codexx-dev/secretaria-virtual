@@ -23,22 +23,11 @@ bool erase(const fs::path& path);
 bool read_bytes(const fs::path& path, std::vector<char>& out);
 
 // ----------------------------------------------------------------------------
-// Conversao de texto
+// Caminhos dentro da pasta de dados (AppConfig)
 // ----------------------------------------------------------------------------
 
-// UTF-8 -> UTF-16 (caminhos do Windows). Falha se o UTF-8 for invalido.
-bool utf8_to_wide(std::string_view in, std::wstring& out);
-
-// UTF-16 -> UTF-8.
-bool wide_to_utf8(std::wstring_view in, std::string& out);
-
-// Texto em uma pagina de codigo (ex.: 1252, o "ANSI" do Excel pt-BR) -> UTF-8.
-bool codepage_to_utf8(std::string_view in, unsigned codepage, std::string& out);
-
-
-//
-//
-//
-
-fs::path get_install_dir();
-fs::path get_data_dir();
+// true se "path" esta DENTRO da pasta de dados (a propria pasta nao conta).
+// Resolve "..", "." e links simbolicos antes de comparar, e ignora diferenca
+// de maiusculas/minusculas conforme o sistema de arquivos. Falso se a pasta
+// de dados nao existir ou nao puder ser descoberta.
+bool is_inside_data_dir(const fs::path& path);

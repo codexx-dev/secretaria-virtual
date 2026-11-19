@@ -1,17 +1,9 @@
 #include "setup.h"
+#include "platform/platform.h"
 #include "utils.h"
 
 #include <filesystem>
 #include <iostream>
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
 
 //retorna false apeanas se a instalação falhar
 bool Setup::install()
@@ -24,9 +16,8 @@ bool Setup::install()
     return false;
   }
 
-  wchar_t buf[MAX_PATH];
-  DWORD len = GetModuleFileNameW(nullptr, buf, MAX_PATH);
-  if (len == 0 || len == MAX_PATH)
+  fs::path src;
+  if (!get_executable_path(src))
   {
     std::cout 
     << "Nao foi possivel descobrir o caminho ate o executavel. Instalacao abortada." 
@@ -34,8 +25,7 @@ bool Setup::install()
     return false;
   }
   
-  const fs::path dst = install_dir / EXE_NAME;
-  const fs::path src = buf;
+  const fs::path dst = install_dir / executable_name();
   std::error_code ec;
 
   if (fs::exists(dst, ec) && fs::equivalent(src, dst, ec)){
@@ -62,20 +52,15 @@ bool Setup::install()
     return false;
   }
 
-  // Registra para iniciar com o Windows (aspas protegem caminhos com espaço)
-  std::wstring cmd = L"\"" + dst.wstring() + L"\"";
-  LSTATUS r = RegSetKeyValueW(
-    HKEY_CURRENT_USER, RUN_KEY, RUN_NAME, REG_SZ,
-    cmd.c_str(),
-    (DWORD)((cmd.size() + 1) * sizeof(wchar_t))
-  );
-  if(r != ERROR_SUCCESS)
+  // Registra para iniciar com o sistema
+  long r = 0;
+  if (!enable_autostart(dst, r))
   {
     std::cout 
     << "App instalado, mas nao foi possivel ativar a inicializacao aoutomatica." << "\n"
     << "Error: " << r << std::endl;
   }
-  
+
   std::cout << "App Instalado" << std::endl;
   return true;
 }
@@ -90,8 +75,8 @@ bool Setup::uninstall()
     return false;
   }
 
-  LSTATUS r = RegDeleteKeyValueW(HKEY_CURRENT_USER, RUN_KEY, RUN_NAME);
-  if (r != ERROR_SUCCESS && r != ERROR_FILE_NOT_FOUND)
+  long r = 0;
+  if (!disable_autostart(r))
   {
     std::cout << "Nao foi possivel remover a inicializacao automatica." << "\n"
     << "Error: " << r << std::endl;

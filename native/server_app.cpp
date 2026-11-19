@@ -1,22 +1,21 @@
 #include "server_app.h"
+#include "app_config.h"
 #include "utils.h"
 
 #include <filesystem>
-#include <io.h>
 #include <rapidjson/document.h>
 
 namespace json = rapidjson;
-namespace 
+namespace
 {
   inline constexpr char IP[] = "127.0.0.1";
-  inline constexpr int DEFAULT_PORT = 8080;
 }  // namespace
 
 bool ServerApp::start()
-{ 
-  fs::path data_dir =  get_data_dir();
+{
+  const AppConfig& config = AppConfig::get_instance();
 
-  if (data_dir.empty())
+  if (config.data_dir().empty())
   {
     std::cout << "A pasta de Dados nao foi encontrado. O app nao pode ser iniciado." << std::endl;
     return false;
@@ -31,7 +30,8 @@ bool ServerApp::start()
     res.set_content("pong", "text/plain"); //test
   });
 
-  //dados
+  /////////
+  // Dados
   /////////
 
   m_svr.Get( "/api/dados", [this](const httplib::Request &req, httplib::Response &res)
@@ -61,7 +61,8 @@ bool ServerApp::start()
     res.status = 501;   // nao implementado
   });
 
-  //configurações
+  /////////
+  // Configurações
   /////////
 
   m_svr.Get( "/api/configuracao", [this](const httplib::Request &req, httplib::Response &res)
@@ -77,13 +78,14 @@ bool ServerApp::start()
   //
   ////////
 
-  if (!m_svr.bind_to_port(IP, DEFAULT_PORT))
+  if (!m_svr.bind_to_port(IP, config.port()))
   {
     std::cout << "Porta ocupada. O app nao pode ser iniciado." << std::endl;
     return false;
   }
   m_thread = std::thread([this] { m_svr.listen_after_bind(); });
 
+  std::cout << "Servidor em http://" << IP << ":" << config.port() << std::endl;
   return true;
 }
 
