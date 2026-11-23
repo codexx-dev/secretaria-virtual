@@ -158,15 +158,26 @@ namespace
     res.status = 204;
   }
 
-  // DELETE /api/dados  {"src": "...", "old": {...}}
+  // DELETE /api/dados  {"src": "...", "old": {...}}      apaga a linha
+  //                    {"src": "...", "delete-all": true}  apaga a tabela inteira
   void delete_data(const httplib::Request& req, httplib::Response& res)
   {
     json::Document body;
     fs::path path;
-    Row old_row;
-    if (!parse_body(req, res, body, path) || !parse_row(body, "old", res, old_row)) return;
+    if (!parse_body(req, res, body, path)) return;
 
-    const DbStatus st = DB::delete_val(path, old_row);
+    const auto all = body.FindMember("delete-all");
+    const bool delete_all = all != body.MemberEnd() && all->value.IsBool() && all->value.GetBool();
+
+    DbStatus st;
+    if (delete_all)
+      st = DB::remove(path);
+    else
+    {
+      Row old_row;
+      if (!parse_row(body, "old", res, old_row)) return;
+      st = DB::delete_val(path, old_row);
+    }
     if (st != DbStatus::Ok) return send_db_error(res, st);
 
     res.status = 204;
