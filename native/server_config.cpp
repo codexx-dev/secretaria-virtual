@@ -20,16 +20,24 @@ namespace
   constexpr int DEFAULT_PORT = 8080;
   constexpr const char* DEFAULT_USER = "default";
 
+  constexpr const char* APP_DIR_NAME = "SecretariaVirtual";
+
   bool is_valid_port(int port) { return port > 0 && port <= 65535; }
 
-  // Pasta de dados que o usuario pode escolher: existe, fica na pasta do usuario
-  // (ou e ela) ou na rede, e aceita leitura e escrita.
-  bool is_allowed_data_dir(const fs::path& dir)
+  // Os dados ficam numa pasta do app dentro da pasta escolhida pelo usuario:
+  // "Documentos" -> "Documentos/SecretariaVirtual". Se ja for ela, fica igual.
+  fs::path app_data_dir(fs::path chosen)
+  {
+    if (!chosen.has_filename()) chosen = chosen.parent_path();   // "Documentos/"
+    return chosen.filename() == APP_DIR_NAME ? chosen : chosen / APP_DIR_NAME;
+  }
+
+  // Pasta que o usuario pode escolher: existe e fica na pasta do usuario (ou e ela) ou na rede.
+  bool is_allowed_location(const fs::path& dir)
   {
     std::error_code ec;
     if (dir.empty() || !fs::is_directory(dir, ec)) return false;
-    if (!is_within(dir, get_user_dir()) && !is_network_path(dir)) return false;
-    return can_read_write(dir);
+    return is_within(dir, get_user_dir()) || is_network_path(dir);
   }
 }  // namespace
 
@@ -125,11 +133,18 @@ bool ServerConfig::save() const
   return write_byte(m_file, std::string_view(buf.GetString(), buf.GetSize()));
 }
 
-ServerConfig::Error ServerConfig::update(const fs::path& data_dir, int port, const std::string& user)
+ServerConfig::Error ServerConfig::update(const fs::path& chosen_dir, int port, const std::string& user)
 {
-  if (!is_allowed_data_dir(data_dir)) return Error::InvalidDataDir;
   if (!is_valid_port(port)) return Error::InvalidPort;
   if (user.empty()) return Error::InvalidUser;
+
+  // A pasta escolhida e validada; os dados vao para a pasta do app dentro dela.
+  const fs::path data_dir = app_data_dir(chosen_dir);
+  if (!is_allowed_location(data_dir.parent_path())) return Error::InvalidDataDir;
+
+  std::error_code ec;
+  fs::create_directory(data_dir, ec);
+  if (!fs::is_directory(data_dir, ec) || !can_read_write(data_dir)) return Error::InvalidDataDir;
 
   std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -157,7 +172,7 @@ const char* ServerConfig::error_message(Error e)
   switch (e)
   {
     case Error::None:           return "Configuracao salva.";
-    case Error::InvalidDataDir: return "A pasta de dados precisa existir, ficar na pasta do usuario ou na rede, e permitir leitura e escrita.";
+    case Error::InvalidDataDir: return "A pasta escolhida precisa existir, ficar na pasta do usuario ou na rede, e permitir leitura e escrita.";
     case Error::InvalidPort:    return "A porta precisa ser um numero entre 1 e 65535.";
     case Error::InvalidUser:    return "O usuario nao pode ser vazio.";
     case Error::SaveFailed:     return "Nao foi possivel gravar o arquivo de configuracao.";

@@ -34,7 +34,8 @@ namespace
     {
       case DbStatus::InvalidName:
       case DbStatus::InvalidColumns:
-      case DbStatus::UnknownColumn:  status = 400; break;
+      case DbStatus::UnknownColumn:
+      case DbStatus::Formula:        status = 400; break;
       case DbStatus::NotFound:
       case DbStatus::RowNotFound:    status = 404; break;
       case DbStatus::AlreadyExists:

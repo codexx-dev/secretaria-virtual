@@ -23,6 +23,7 @@ enum class DbStatus
   AlreadyExists,    // create() em tabela que ja existe
   RowNotFound,      // linha nao existe (ou foi alterada por outro programa)
   DuplicateRow,     // ja existe uma linha igual
+  Formula,          // texto que o Excel executaria como formula (=, +, -, @)
   Locked,           // arquivo em uso (ex.: aberto no Excel) ou sem permissao
   IoError,          // outra falha de disco
   BadFormat,        // .csv corrompido ou editado de forma invalida

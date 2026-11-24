@@ -35,6 +35,22 @@ namespace
     return true;
   }
 
+  // Texto que o Excel trataria como formula ao abrir o .csv: comeca, depois de
+  // espacos, com = + - @ ou com tab/CR. Formulas podem rodar comandos ou mandar
+  // dados para fora, entao nunca sao gravadas.
+  bool is_formula(std::string_view text)
+  {
+    const size_t i = text.find_first_not_of(' ');
+    return i != std::string_view::npos && std::string_view("=+-@\t\r").find(text[i]) != std::string_view::npos;
+  }
+
+  bool has_formula(const Row& row)
+  {
+    for (const Field& f : row)
+      if (is_formula(f.first) || is_formula(f.second)) return true;
+    return false;
+  }
+
   std::vector<std::string> names_of(const Row& row)
   {
     std::vector<std::string> names;
@@ -109,6 +125,7 @@ const char* db_status_message(DbStatus st)
     case DbStatus::AlreadyExists:  return "A tabela ja existe.";
     case DbStatus::RowNotFound:    return "Linha nao encontrada. Ela pode ter sido alterada por outro programa.";
     case DbStatus::DuplicateRow:   return "Ja existe uma linha igual.";
+    case DbStatus::Formula:        return "Valores e colunas nao podem comecar com =, +, - ou @ (seriam formulas no Excel).";
     case DbStatus::Locked:         return "Arquivo em uso por outro programa (ex.: Excel) ou sem permissao.";
     case DbStatus::IoError:        return "Falha ao acessar o disco.";
     case DbStatus::BadFormat:      return "O arquivo .csv esta corrompido ou em formato invalido.";
@@ -126,6 +143,7 @@ DbStatus DB::create(const fs::path& path, const std::vector<std::string>& column
 {
   if (!is_inside_data_dir(path)) return DbStatus::InvalidName;
   if (!are_valid_names(columns)) return DbStatus::InvalidColumns;
+  if (std::any_of(columns.begin(), columns.end(), is_formula)) return DbStatus::Formula;
 
   CsvFile file;
   DbStatus st = from_csv(file.open(path, OpenMode::CreateIfMissing, LOCK_TIMEOUT_MS));
@@ -154,6 +172,7 @@ DbStatus DB::insert_val(const fs::path& path, const Row& row)
 {
   // Validado antes de abrir: tabela nova nunca fica criada por coluna invalida.
   if (!are_valid_names(names_of(row))) return DbStatus::InvalidColumns;
+  if (has_formula(row)) return DbStatus::Formula;
 
   CsvFile file;
   CsvTable table;
@@ -175,6 +194,8 @@ DbStatus DB::insert_val(const fs::path& path, const Row& row)
 
 DbStatus DB::update_val(const fs::path& path, const Row& old_row, const Row& new_row)
 {
+  if (has_formula(new_row)) return DbStatus::Formula;   // old_row so localiza a linha
+
   CsvFile file;
   CsvTable table;
   DbStatus st = open_table(path, OpenMode::Existing, file, table);

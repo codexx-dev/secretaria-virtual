@@ -34,33 +34,72 @@ namespace
     return false;
   }
 
-  // CORS: so paginas das origens permitidas podem chamar a API pelo navegador.
-  // Requisicoes sem "Origin" (curl, o proprio app) nao vem de um site e passam.
-  void allow_origins(httplib::Server& svr)
+  // Host: so o proprio endereco do servidor. Barra o DNS rebinding, em que o
+  // dominio de um site passa a apontar para 127.0.0.1 e a pagina dele le a API.
+  bool is_allowed_host(const std::string& host, int port)
   {
-    svr.set_pre_routing_handler([](const httplib::Request& req, httplib::Response& res)
-    {
-      if (!req.has_header("Origin")) return httplib::Server::HandlerResponse::Unhandled;
+    const std::string suffix = ":" + std::to_string(port);
+    for (const char* name : {"127.0.0.1", "localhost"})
+      if (host == name + suffix || (port == 80 && host == name)) return true;
+    return false;
+  }
 
-      const std::string origin = req.get_header_value("Origin");
-      if (!is_allowed_origin(origin))
+  // Alteracao de dados so com corpo JSON. Formularios de outros sites nao
+  // conseguem mandar esse tipo, e fetch/XHR com ele passam pelo preflight (CORS).
+  bool needs_json(const httplib::Request& req)
+  {
+    return req.method == "POST" || req.method == "PUT" || req.method == "DELETE";
+  }
+
+  bool is_json(const httplib::Request& req)
+  {
+    return req.get_header_value("Content-Type").rfind("application/json", 0) == 0;
+  }
+
+  // Filtro que roda antes de todas as rotas: Host, origem (CORS) e tipo do corpo.
+  // Requisicoes sem "Origin" (curl, o proprio app) nao vem de um site e passam no CORS.
+  void filter_requests(httplib::Server& svr, int port)
+  {
+    svr.set_pre_routing_handler([port](const httplib::Request& req, httplib::Response& res)
+    {
+      if (!is_allowed_host(req.get_header_value("Host"), port))
       {
         res.status = 403;
         return httplib::Server::HandlerResponse::Handled;
       }
 
-      res.set_header("Access-Control-Allow-Origin", origin);
-      res.set_header("Vary", "Origin");
+      if (req.has_header("Origin"))
+      {
+        const std::string origin = req.get_header_value("Origin");
+        if (!is_allowed_origin(origin))
+        {
+          res.status = 403;
+          return httplib::Server::HandlerResponse::Handled;
+        }
 
-      if (req.method != "OPTIONS") return httplib::Server::HandlerResponse::Unhandled;
+        res.set_header("Access-Control-Allow-Origin", origin);
+        res.set_header("Vary", "Origin");
 
-      // Preflight: o navegador pergunta antes de POST/PUT/DELETE com JSON.
-      res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-      res.set_header("Access-Control-Allow-Headers", "Content-Type");
-      if (req.has_header("Access-Control-Request-Private-Network"))   // site publico -> 127.0.0.1
-        res.set_header("Access-Control-Allow-Private-Network", "true");
-      res.status = 204;
-      return httplib::Server::HandlerResponse::Handled;
+        if (req.method == "OPTIONS")
+        {
+          // Preflight: o navegador pergunta antes de POST/PUT/DELETE com JSON.
+          res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+          res.set_header("Access-Control-Allow-Headers", "Content-Type");
+          if (req.has_header("Access-Control-Request-Private-Network"))   // site publico -> 127.0.0.1
+            res.set_header("Access-Control-Allow-Private-Network", "true");
+          res.status = 204;
+          return httplib::Server::HandlerResponse::Handled;
+        }
+      }
+
+      if (needs_json(req) && !is_json(req))
+      {
+        res.status = 415;
+        res.set_content("{\"err\":\"Envie o corpo com Content-Type: application/json.\"}", "application/json");
+        return httplib::Server::HandlerResponse::Handled;
+      }
+
+      return httplib::Server::HandlerResponse::Unhandled;
     });
   }
 
@@ -91,7 +130,7 @@ bool ServerApp::start()
     return false;
   }
 
-  allow_origins(m_svr);
+  filter_requests(m_svr, config.port());
   log_responses(m_svr);
   register_routes(m_svr);
 

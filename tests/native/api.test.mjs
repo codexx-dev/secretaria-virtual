@@ -2,6 +2,7 @@
 
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { get } from "node:http";
 import { join } from "node:path";
 import { after, before, describe, test } from "node:test";
 
@@ -62,10 +63,20 @@ describe("/api/dados", () => {
     assert.ok((await res.json()).err);
   });
 
+  test("recusa formulas do Excel nos valores", async () => {
+    const res = await call("POST", "/api/dados", { src: SRC, new: { nome: '=HYPERLINK("http://x")', mãe: "Joana" } });
+    assert.equal(res.status, 400);
+  });
+
   test("registra as respostas no log.txt, com a descricao do erro", async () => {
     const log = await readFile(server.logFile, "utf8");
     assert.match(log, /\[INFO\] POST \/api\/dados -> 201/);
     assert.match(log, /\[ERRO\] POST \/api\/dados -> 409 \{"err":"Ja existe uma linha igual\."\}/);
+  });
+
+  test("src com quebra de linha nao cria linha falsa no log", async () => {
+    await call("GET", `/api/dados?src=${encodeURIComponent("x\n2000-01-01 00:00:00 [INFO] falso")}`);
+    assert.doesNotMatch(await readFile(server.logFile, "utf8"), /^2000-01-01/m);
   });
 });
 
@@ -85,13 +96,19 @@ describe("/api/configuracao", () => {
     assert.equal(JSON.parse(await readFile(server.configFile, "utf8")).usuario, "Secretária 1");
   });
 
-  test("POST so aceita pasta de dados dentro da pasta do usuario (ou na rede)", async () => {
+  test("POST so aceita pasta dentro da pasta do usuario e usa a pasta do app dentro dela", async () => {
     const outside = process.env.SystemRoot; // C:\Windows
     assert.equal((await call("POST", "/api/configuracao", { data: outside })).status, 400);
 
-    const inside = join(server.dataDir, "nova pasta");
-    await mkdir(inside);
-    assert.equal((await call("POST", "/api/configuracao", { data: inside })).status, 200);
+    const chosen = join(server.dataDir, "nova pasta");
+    await mkdir(chosen);
+    const res = await call("POST", "/api/configuracao", { data: chosen });
+    assert.equal(res.status, 200);
+    const { data } = await res.json();
+    assert.equal(data, join(chosen, "SecretariaVirtual"));
+
+    // Mandar de volta a pasta do app nao cria outra dentro dela.
+    assert.equal((await (await call("POST", "/api/configuracao", { data })).json()).data, data);
   });
 });
 
@@ -114,6 +131,27 @@ describe("CORS", () => {
   test("recusa outras origens, inclusive as parecidas com localhost", async () => {
     for (const origin of ["https://outro-site.example", "http://localhost.outro-site.example"])
       assert.equal((await ping(origin)).status, 403, origin);
+  });
+});
+
+describe("protecao contra outros sites", () => {
+  test("recusa Host diferente do servidor (DNS rebinding)", async () => {
+    const status = await new Promise((ok, fail) =>
+      get(`${server.url}/api/ping`, { headers: { Host: "site-malicioso.example:8080" } }, (res) => {
+        res.resume();
+        ok(res.statusCode);
+      }).on("error", fail),
+    );
+    assert.equal(status, 403);
+  });
+
+  test("recusa alteracao sem Content-Type JSON (formulario de outro site)", async () => {
+    const res = await fetch(`${server.url}/api/dados`, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ src: SRC, new: { nome: "Caio", mãe: "Rosa" } }),
+    });
+    assert.equal(res.status, 415);
   });
 });
 

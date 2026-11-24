@@ -12,8 +12,13 @@ namespace
 {
   std::mutex g_mutex;
 
-  void write(const char* level, const std::string& message)
+  void write(const char* level, std::string message)
   {
+    // Quebra de linha e outros controles viram espaco: um texto vindo de fora
+    // (ex.: o src da requisicao) nao consegue criar linhas falsas no log.
+    for (char& c : message)
+      if (static_cast<unsigned char>(c) < 0x20) c = ' ';
+
     const std::time_t now = std::time(nullptr);
     std::tm local{};
     localtime_s(&local, &now);

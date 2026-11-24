@@ -41,9 +41,10 @@ public:
   std::string user() const                 { std::lock_guard<std::mutex> lock(m_mutex); return m_user; }
 
   // Valida, grava no arquivo e, se der certo, passa a valer na memoria.
-  // A pasta de dados precisa existir, ficar na pasta do usuario ou na rede e
-  // permitir leitura e escrita. A porta nova so vale apos reiniciar.
-  Error update(const fs::path& data_dir, int port, const std::string& user);
+  // chosen_dir precisa existir e ficar na pasta do usuario ou na rede; os dados
+  // vao para chosen_dir/SecretariaVirtual, criada se preciso (se chosen_dir ja
+  // for essa pasta, fica ela mesma). A porta nova so vale apos reiniciar.
+  Error update(const fs::path& chosen_dir, int port, const std::string& user);
 
   static const char* error_message(Error e);
 };
