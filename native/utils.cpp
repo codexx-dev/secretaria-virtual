@@ -1,9 +1,9 @@
 #include "utils.h"
+#include "log.h"
 #include "server_config.h"
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <string>
 
 // ----------------------------------------------------------------------------
@@ -19,9 +19,7 @@ bool ensure_parent_dir(const fs::path& path)
   fs::create_directories(parent, ec);
   if (ec)
   {
-    std::cout
-    << "Nao foi possivel criar o diretorio do arquivo." << "\n"
-    << "Error: " << ec << std::endl;
+    log_error("Falha ao criar a pasta " + quoted(parent) + ": " + describe(ec));
     return false;
   }
   return true;
@@ -31,7 +29,7 @@ bool write_byte(const fs::path& path, std::string_view data)
 {
   if (path.empty() || data.empty())
   {
-    std::cout << "Caminho ou conteudo invalido. Escrita abortada." << std::endl;
+    log_error("Escrita abortada: caminho ou conteudo vazio (" + quoted(path) + ").");
     return false;
   }
 
@@ -44,7 +42,7 @@ bool write_byte(const fs::path& path, std::string_view data)
     std::ofstream out(tmp, std::ios::binary | std::ios::trunc);
     if (!out)
     {
-      std::cout << "Nao foi possivel abrir o arquivo temporario para escrita." << std::endl;
+      log_error("Falha ao abrir para escrita " + quoted(tmp) + ".");
       return false;
     }
 
@@ -53,7 +51,7 @@ bool write_byte(const fs::path& path, std::string_view data)
 
     if (!out.good())
     {
-      std::cout << "Falha ao escrever no arquivo temporario." << std::endl;
+      log_error("Falha ao escrever em " + quoted(tmp) + ".");
       out.close();
       std::error_code rm_ec;
       fs::remove(tmp, rm_ec);   // nao deixa lixo para tras
@@ -65,9 +63,7 @@ bool write_byte(const fs::path& path, std::string_view data)
   fs::rename(tmp, path, ec);
   if (ec)
   {
-    std::cout
-    << "Nao foi possivel substituir o arquivo de destino." << "\n"
-    << "Error: " << ec << std::endl;
+    log_error("Falha ao substituir " + quoted(path) + ": " + describe(ec));
     std::error_code rm_ec;
     fs::remove(tmp, rm_ec);
     return false;
@@ -80,7 +76,7 @@ bool erase(const fs::path& path)
 {
   if (path.empty())
   {
-    std::cout << "Caminho invalido. Exclusao abortada." << std::endl;
+    log_error("Exclusao abortada: caminho vazio.");
     return false;
   }
 
@@ -88,9 +84,7 @@ bool erase(const fs::path& path)
   fs::remove(path, ec);
   if (ec)
   {
-    std::cout
-    << "Nao foi possivel apagar o arquivo." << "\n"
-    << "Error: " << ec << std::endl;
+    log_error("Falha ao apagar " + quoted(path) + ": " + describe(ec));
     return false;
   }
   return true;
@@ -98,25 +92,20 @@ bool erase(const fs::path& path)
 
 bool read_bytes(const fs::path& path, std::vector<char>& out)
 {
-  std::ifstream in(fs::path(path), std::ios::binary | std::ios::ate);
+  std::ifstream in(path, std::ios::binary | std::ios::ate);
   if (!in)
   {
-    std::cout << "Nao foi possivel ler o arquivo no caminho especificado." << std::endl;
+    log_error("Falha ao abrir para leitura " + quoted(path) + ".");
     return false;
   }
 
-  std::streamsize size = in.tellg();   // ate: já abre no fim
-  if (size < 0)
-  {
-    std::cout << "Falha ao ler o arquivo." << std::endl;
-    return false;
-  }
-
+  const std::streamsize size = in.tellg();   // ate: ja abre no fim
   in.seekg(0, std::ios::beg);
 
-  out.resize(static_cast<size_t>(size));
-  if (size > 0 && !in.read(out.data(), size)) {
-    std::cout << "Falha ao ler o arquivo." << std::endl;
+  out.resize(size > 0 ? static_cast<size_t>(size) : 0);
+  if (size < 0 || (size > 0 && !in.read(out.data(), size)))
+  {
+    log_error("Falha ao ler " + quoted(path) + ".");
     out.clear();
     return false;
   }

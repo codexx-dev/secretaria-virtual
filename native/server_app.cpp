@@ -1,9 +1,9 @@
 #include "server_app.h"
+#include "log.h"
 #include "server_config.h"
 #include "server_routes.h"
 
 #include <algorithm>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -40,6 +40,22 @@ namespace
       return httplib::Server::HandlerResponse::Handled;
     });
   }
+
+  // Uma linha por resposta: "DELETE /api/dados src=T/ALUNOS -> 404 {"err":"..."}".
+  // O corpo so entra em erro, onde ele e a descricao enviada ao cliente.
+  void log_responses(httplib::Server& svr)
+  {
+    svr.set_logger([](const httplib::Request& req, const httplib::Response& res)
+    {
+      std::string line = req.method + " " + req.path;
+      if (req.has_param("src")) line += " src=" + req.get_param_value("src");
+      line += " -> " + std::to_string(res.status);
+
+      if (res.status < 400) return log_info(line);
+      if (!res.body.empty()) line += " " + res.body;
+      log_error(line);
+    });
+  }
 }
 
 bool ServerApp::start()
@@ -48,21 +64,22 @@ bool ServerApp::start()
 
   if (config.data_dir().empty())
   {
-    std::cout << "A pasta de Dados nao foi encontrado. O app nao pode ser iniciado." << std::endl;
+    log_error("Pasta de dados nao definida. O servidor nao pode ser iniciado.");
     return false;
   }
 
   allow_origins(m_svr, config.origins());
+  log_responses(m_svr);
   register_routes(m_svr);
 
   if (!m_svr.bind_to_port(IP, config.port()))
   {
-    std::cout << "Porta ocupada. O app nao pode ser iniciado." << std::endl;
+    log_error("Porta " + std::to_string(config.port()) + " ocupada. O servidor nao pode ser iniciado.");
     return false;
   }
   m_thread = std::thread([this] { m_svr.listen_after_bind(); });
 
-  std::cout << "Servidor em http://" << IP << ":" << config.port() << std::endl;
+  log_info("Servidor em http://" + std::string(IP) + ":" + std::to_string(config.port()));
   return true;
 }
 

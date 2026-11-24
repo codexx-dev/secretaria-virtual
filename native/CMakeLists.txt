@@ -40,6 +40,7 @@ FetchContent_MakeAvailable(rapidjson)
 # alvos em outro diretorio.
 set(NAT_COMP_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/log.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/server_config.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/server_app.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/server_routes.cpp
@@ -51,7 +52,18 @@ set(NAT_COMP_SOURCES
 
 # Definicoes comuns a todas as plataformas.
 set(NAT_COMP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${rapidjson_SOURCE_DIR}/include)
-set(NAT_COMP_DEFINITIONS RAPIDJSON_HAS_STDSTRING=1)   # std::string direto no rapidjson
+set(NAT_COMP_DEFINITIONS
+  RAPIDJSON_HAS_STDSTRING=1                 # std::string direto no rapidjson
+  NAT_COMP_VERSION="${PROJECT_VERSION}"     # versao no log
+)
+
+# Log: sempre em <instalacao>/log.txt. Com LOG_TO_CONSOLE=ON tambem no console;
+# com OFF o .exe abre sem janela de console (so o icone da bandeja).
+#   cmake -S native -B build -DLOG_TO_CONSOLE=OFF
+option(LOG_TO_CONSOLE "Escreve o log tambem no console" ON)
+if(LOG_TO_CONSOLE)
+  list(APPEND NAT_COMP_DEFINITIONS LOG_TO_CONSOLE)
+endif()
 
 # Icone do executavel (public/ do frontend).
 set(ICON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../public/favicon.ico)

@@ -1,8 +1,9 @@
+#include "platform/platform.h"
 #include "platform/sys_tray.h"
+#include "log.h"
 #include "utils.h"
 
 #include <fstream>
-#include <iostream>
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -32,6 +33,7 @@ namespace
   {
     if (!fs::exists(file) && ensure_parent_dir(file)) std::ofstream{file};   // cria vazio
 
+    log_info("Abrindo " + quoted(file) + " no Bloco de Notas.");
     const std::wstring args = L"\"" + file.wstring() + L"\"";
     ShellExecuteW(nullptr, L"open", L"notepad.exe", args.c_str(), nullptr, SW_SHOWNORMAL);
   }
@@ -109,7 +111,7 @@ SysTray::Action SysTray::run(const fs::path& config_file)
   HWND hwnd = CreateWindowW(CLASS_NAME, L"", WS_OVERLAPPED, 0, 0, 0, 0, nullptr, nullptr, inst, nullptr);
   if (!hwnd)
   {
-    std::cout << "Nao foi possivel criar o icone da bandeja." << std::endl;
+    log_error("Falha ao criar a janela da bandeja: " + system_error_message(GetLastError()));
     return Action::Exit;
   }
   SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
@@ -127,7 +129,7 @@ SysTray::Action SysTray::run(const fs::path& config_file)
 
   if (!Shell_NotifyIconW(NIM_ADD, &icon))
   {
-    std::cout << "Nao foi possivel criar o icone da bandeja." << std::endl;
+    log_error("Falha ao criar o icone da bandeja.");
     DestroyWindow(hwnd);
     return Action::Exit;
   }

@@ -32,6 +32,14 @@ function(add_nat_comp target httplib_dir winnt)
   )
   target_link_libraries(${target} PRIVATE ws2_32 shell32)
 
+  # Sem log no console: aplicativo de janela, que abre sem a janela do console.
+  if(NOT LOG_TO_CONSOLE)
+    set_property(TARGET ${target} PROPERTY WIN32_EXECUTABLE TRUE)
+    if(MSVC)
+      target_link_options(${target} PRIVATE /ENTRY:mainCRTStartup)   # continua usando main()
+    endif()
+  endif()
+
   # Linkagem estatica: embute a runtime do C++ (libc++/libstdc++, libunwind,
   # winpthread) no exe, para nao depender de DLLs que nao vem com o Windows.
   if(MSVC)

@@ -1,8 +1,8 @@
 #include "server_config.h"
+#include "log.h"
 #include "platform/platform.h"
 #include "utils.h"
 
-#include <iostream>
 #include <string_view>
 
 #include <rapidjson/document.h>
@@ -47,7 +47,7 @@ ServerConfig::ServerConfig()
   const fs::path install_dir = get_install_dir();
   if (install_dir.empty())
   {
-    std::cout << "Pasta de instalacao nao encontrada. Usando a configuracao padrao." << std::endl;
+    log_error("Pasta de instalacao nao encontrada. Usando a configuracao padrao.");
     return;
   }
   m_file = install_dir / "config.json";
@@ -56,8 +56,8 @@ ServerConfig::ServerConfig()
   const bool exists = fs::exists(m_file, ec) && fs::file_size(m_file, ec) > 0;
   if (exists && load()) return;
 
-  if (exists) std::cout << "Configuracao incompleta ou invalida. Arquivo regravado com as opcoes validas." << std::endl;
-  save();
+  if (exists) log_error("Configuracao incompleta ou invalida em " + quoted(m_file) + ". Regravada com as opcoes validas.");
+  if (save()) log_info("Configuracao gravada em " + quoted(m_file) + ".");
 }
 
 // Le o arquivo. Cada opcao valida substitui o padrao. Retorna false se alguma
@@ -78,8 +78,7 @@ bool ServerConfig::load()
     backup += ".bak";
     std::error_code ec;
     fs::copy_file(m_file, backup, fs::copy_options::overwrite_existing, ec);
-    std::cout << "Arquivo de configuracao invalido (nos caminhos, use \\\\ ou /). "
-                 "Copia salva em config.json.bak." << std::endl;
+    log_error("Configuracao com JSON invalido (nos caminhos, use \\\\ ou /). Copia salva em " + quoted(backup) + ".");
     return false;
   }
 
@@ -158,7 +157,11 @@ ServerConfig::Error ServerConfig::update(const fs::path& data_dir, int port, con
   m_data_dir = data_dir;
   m_port = port;
   m_user = user;
-  if (save()) return Error::None;
+  if (save())
+  {
+    log_info("Configuracao alterada: dados=" + quoted(m_data_dir) + ", porta=" + std::to_string(m_port) + ", usuario=" + m_user + ".");
+    return Error::None;
+  }
 
   m_data_dir = old_data_dir;   // arquivo nao gravado: memoria volta ao que era
   m_port = old_port;

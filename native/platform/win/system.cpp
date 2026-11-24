@@ -81,3 +81,18 @@ bool start_new_instance()
   CloseHandle(pi.hProcess);
   return true;
 }
+
+std::string system_error_message(long code)
+{
+  wchar_t* buf = nullptr;
+  const DWORD len = FormatMessageW(
+    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+    nullptr, static_cast<DWORD>(code), 0, reinterpret_cast<wchar_t*>(&buf), 0, nullptr);
+
+  std::string out;
+  if (len > 0) wide_to_utf8(std::wstring_view(buf, len), out);
+  if (buf) LocalFree(buf);
+
+  while (!out.empty() && (out.back() == '\n' || out.back() == '\r')) out.pop_back();
+  return out.empty() ? "erro " + std::to_string(code) : out;
+}

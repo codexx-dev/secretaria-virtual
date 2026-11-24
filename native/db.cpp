@@ -1,4 +1,5 @@
 #include "db.h"
+#include "log.h"
 #include "utils.h"
 
 #include <algorithm>
@@ -86,6 +87,13 @@ namespace
 
     return from_csv(file.read(table));
   }
+
+  // Registra no log a operacao que deu certo.
+  DbStatus logged(DbStatus st, const char* operation, const fs::path& path)
+  {
+    if (st == DbStatus::Ok) log_info(std::string(operation) + ": " + quoted(path));
+    return st;
+  }
 }  // namespace
 
 
@@ -128,7 +136,7 @@ DbStatus DB::create(const fs::path& path, const std::vector<std::string>& column
   table.header = columns;
   st = from_csv(file.write(table));
   if (st != DbStatus::Ok) file.remove();   // nao deixa arquivo vazio para tras
-  return st;
+  return logged(st, "Tabela criada", path);
 }
 
 DbStatus DB::remove(const fs::path& path)
@@ -139,7 +147,7 @@ DbStatus DB::remove(const fs::path& path)
   const DbStatus st = from_csv(file.open(path, OpenMode::Existing, LOCK_TIMEOUT_MS));
   if (st != DbStatus::Ok) return st;
 
-  return from_csv(file.remove());
+  return logged(from_csv(file.remove()), "Tabela apagada", path);
 }
 
 DbStatus DB::insert_val(const fs::path& path, const Row& row)
@@ -162,7 +170,7 @@ DbStatus DB::insert_val(const fs::path& path, const Row& row)
   table.rows.push_back(std::move(csv_row));
   st = from_csv(file.write(table));
   if (st != DbStatus::Ok && file.created()) file.remove();   // nao deixa arquivo vazio
-  return st;
+  return logged(st, "Linha inserida", path);
 }
 
 DbStatus DB::update_val(const fs::path& path, const Row& old_row, const Row& new_row)
@@ -186,7 +194,7 @@ DbStatus DB::update_val(const fs::path& path, const Row& old_row, const Row& new
     return DbStatus::DuplicateRow;
 
   *it = std::move(new_csv);
-  return from_csv(file.write(table));
+  return logged(from_csv(file.write(table)), "Linha alterada", path);
 }
 
 DbStatus DB::delete_val(const fs::path& path, const Row& row)
@@ -204,5 +212,5 @@ DbStatus DB::delete_val(const fs::path& path, const Row& row)
   if (it == table.rows.end()) return DbStatus::RowNotFound;
 
   table.rows.erase(it);
-  return from_csv(file.write(table));
+  return logged(from_csv(file.write(table)), "Linha apagada", path);
 }

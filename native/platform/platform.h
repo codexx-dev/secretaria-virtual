@@ -56,3 +56,6 @@ bool disable_autostart(long& error);
 
 // Inicia uma nova instancia do executavel.
 bool start_new_instance();
+
+// Descricao de um codigo de erro do sistema, em UTF-8 (ex.: "Acesso negado.").
+std::string system_error_message(long code);
