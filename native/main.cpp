@@ -5,18 +5,24 @@
 #include "server_config.h"
 #include "setup.h"
 
+#include <string_view>
+
 #ifdef LOG_TO_CONSOLE
 #include <iostream>
 #endif
 
-int main()
+int main(int argc, char* argv[])
 {
+  // --no-install: roda sem se instalar (usado pelos testes automatizados).
+  bool install = true;
+  for (int i = 1; i < argc; ++i)
+    if (std::string_view(argv[i]) == "--no-install") install = false;
+
   fs::path exe;
   get_executable_path(exe);
   log_info("Iniciado: versao " NAT_COMP_VERSION ", " + quoted(exe));
 
-  Setup setup;
-  setup.install();
+  if (install) Setup().install();
 
   ServerApp server;
   if (!server.start())

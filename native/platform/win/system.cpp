@@ -23,11 +23,31 @@ fs::path get_install_dir()
   return fs::path(appdata) / "SecretariaVirtual";
 }
 
-fs::path get_default_data_dir()
+fs::path get_user_dir()
 {
   const wchar_t* user_prof = _wgetenv(L"USERPROFILE");
-  if (!user_prof) return fs::path();
-  return fs::path(user_prof) / "Documents" / "SecretariaVirtual";
+  return user_prof ? fs::path(user_prof) : fs::path();
+}
+
+fs::path get_default_data_dir()
+{
+  const fs::path user_dir = get_user_dir();
+  if (user_dir.empty()) return fs::path();
+  return user_dir / "Documents" / "SecretariaVirtual";
+}
+
+bool is_network_path(const fs::path& path)
+{
+  std::error_code ec;
+  const std::wstring root = fs::absolute(path, ec).root_name().wstring();   // "C:" ou "\\servidor\pasta"
+  if (ec) return false;
+
+  // "\\?\" e "\\.\" sao prefixos de caminho local, nao de rede.
+  if (root.rfind(L"\\\\?\\", 0) == 0 || root.rfind(L"\\\\.\\", 0) == 0) return false;
+  if (root.rfind(L"\\\\", 0) == 0) return true;   // \\servidor\pasta
+
+  // Unidade mapeada (ex.: Z:).
+  return root.size() == 2 && root[1] == L':' && GetDriveTypeW((root + L"\\").c_str()) == DRIVE_REMOTE;
 }
 
 bool get_executable_path(fs::path& out)

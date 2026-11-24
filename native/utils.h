@@ -31,3 +31,9 @@ bool read_bytes(const fs::path& path, std::vector<char>& out);
 // de maiusculas/minusculas conforme o sistema de arquivos. Falso se a pasta
 // de dados nao existir ou nao puder ser descoberta.
 bool is_inside_data_dir(const fs::path& path);
+
+// true se "path" e a propria "base" ou esta dentro dela (mesma resolucao acima).
+bool is_within(const fs::path& path, const fs::path& base);
+
+// true se da para criar, ler e apagar um arquivo dentro da pasta.
+bool can_read_write(const fs::path& dir);

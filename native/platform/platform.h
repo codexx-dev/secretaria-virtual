@@ -37,6 +37,12 @@ fs::path get_install_dir();
 // Pasta padrao dos dados (CSV/Excel) do usuario. Vazio se nao for possivel descobrir.
 fs::path get_default_data_dir();
 
+// Pasta do usuario corrente (ex.: C:\Users\Ana). Vazio se nao for possivel descobrir.
+fs::path get_user_dir();
+
+// true se o caminho fica numa pasta de rede (\\servidor\pasta ou unidade mapeada).
+bool is_network_path(const fs::path& path);
+
 // ----------------------------------------------------------------------------
 // Executavel e inicializacao automatica
 // ----------------------------------------------------------------------------

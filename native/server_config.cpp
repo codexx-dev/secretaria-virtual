@@ -24,6 +24,16 @@ namespace
 
   bool is_valid_port(int port) { return port > 0 && port <= 65535; }
 
+  // Pasta de dados que o usuario pode escolher: existe, fica na pasta do usuario
+  // (ou e ela) ou na rede, e aceita leitura e escrita.
+  bool is_allowed_data_dir(const fs::path& dir)
+  {
+    std::error_code ec;
+    if (dir.empty() || !fs::is_directory(dir, ec)) return false;
+    if (!is_within(dir, get_user_dir()) && !is_network_path(dir)) return false;
+    return can_read_write(dir);
+  }
+
   // Uma origem e so esquema, host e porta: "https://site.com/app/" -> "https://site.com".
   std::string to_origin(std::string url)
   {
@@ -143,8 +153,7 @@ bool ServerConfig::save() const
 
 ServerConfig::Error ServerConfig::update(const fs::path& data_dir, int port, const std::string& user)
 {
-  std::error_code ec;
-  if (data_dir.empty() || !fs::is_directory(data_dir, ec)) return Error::InvalidDataDir;
+  if (!is_allowed_data_dir(data_dir)) return Error::InvalidDataDir;
   if (!is_valid_port(port)) return Error::InvalidPort;
   if (user.empty()) return Error::InvalidUser;
 
@@ -174,7 +183,7 @@ const char* ServerConfig::error_message(Error e)
   switch (e)
   {
     case Error::None:           return "Configuracao salva.";
-    case Error::InvalidDataDir: return "A pasta de dados precisa ser uma pasta existente.";
+    case Error::InvalidDataDir: return "A pasta de dados precisa existir, ficar na pasta do usuario ou na rede, e permitir leitura e escrita.";
     case Error::InvalidPort:    return "A porta precisa ser um numero entre 1 e 65535.";
     case Error::InvalidUser:    return "O usuario nao pode ser vazio.";
     case Error::SaveFailed:     return "Nao foi possivel gravar o arquivo de configuracao.";

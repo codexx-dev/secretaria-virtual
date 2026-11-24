@@ -116,18 +116,48 @@ bool read_bytes(const fs::path& path, std::vector<char>& out)
 // Caminhos dentro da pasta de dados
 // ----------------------------------------------------------------------------
 
+namespace
+{
+  // Caminho de "path" a partir de "base", depois de resolver "..", "." e links.
+  // Vazio se nao der para resolver; comeca com ".." se estiver fora da base.
+  fs::path relative_to(const fs::path& path, const fs::path& base)
+  {
+    if (path.empty() || base.empty()) return {};
+
+    std::error_code ec;
+    const fs::path b = fs::weakly_canonical(base, ec);
+    if (ec) return {};
+    const fs::path p = fs::weakly_canonical(path, ec);
+    if (ec) return {};
+
+    return p.lexically_relative(b);
+  }
+}  // namespace
+
 bool is_inside_data_dir(const fs::path& path)
 {
-  const fs::path data_dir = ServerConfig::get_instance().data_dir();
-  if (data_dir.empty() || path.empty()) return false;
+  const fs::path rel = relative_to(path, ServerConfig::get_instance().data_dir());
+  return !rel.empty() && rel != "." && *rel.begin() != "..";
+}
+
+bool is_within(const fs::path& path, const fs::path& base)
+{
+  const fs::path rel = relative_to(path, base);
+  return !rel.empty() && *rel.begin() != "..";
+}
+
+bool can_read_write(const fs::path& dir)
+{
+  const fs::path probe = dir / ".secretaria-virtual-teste.tmp";
+  {
+    std::ofstream out(probe, std::ios::binary);
+    if (!(out << "ok")) return false;
+  }
+
+  std::string text;
+  std::ifstream(probe, std::ios::binary) >> text;
 
   std::error_code ec;
-  const fs::path base = fs::weakly_canonical(data_dir, ec);
-  if (ec) return false;
-  const fs::path target = fs::weakly_canonical(path, ec);
-  if (ec) return false;
-
-  // Caminho do alvo a partir da base: se comeca com "..", esta fora.
-  const fs::path rel = target.lexically_relative(base);
-  return !rel.empty() && rel != "." && *rel.begin() != "..";
+  fs::remove(probe, ec);
+  return text == "ok" && !ec;
 }
