@@ -7,20 +7,43 @@
 #include <string>
 #include <vector>
 
+// Origens de native/origins.txt, definidas pelo CMake (-DNAT_COMP_ORIGINS=...).
+#ifndef NAT_COMP_ORIGINS
+#error "NAT_COMP_ORIGINS nao definido: compile pelo CMake, que le native/origins.txt."
+#endif
+
 namespace
 {
   constexpr char IP[] = "127.0.0.1";
 
+  // Origens do build (origins.txt) ou pagina na propria maquina, em qualquer
+  // porta: http(s)://localhost e http(s)://127.0.0.1.
+  bool is_allowed_origin(const std::string& origin)
+  {
+    static const std::vector<std::string> build_origins{ NAT_COMP_ORIGINS };
+    if (std::find(build_origins.begin(), build_origins.end(), origin) != build_origins.end()) return true;
+
+    for (const char* local : {"http://localhost", "https://localhost", "http://127.0.0.1", "https://127.0.0.1"})
+    {
+      const std::string prefix = local;
+      if (origin.rfind(prefix, 0) != 0) continue;
+      const std::string port = origin.substr(prefix.size());   // "" ou ":5173"
+      if (port.empty() || (port.size() > 1 && port[0] == ':' && port.find_first_not_of("0123456789", 1) == std::string::npos))
+        return true;
+    }
+    return false;
+  }
+
   // CORS: so paginas das origens permitidas podem chamar a API pelo navegador.
   // Requisicoes sem "Origin" (curl, o proprio app) nao vem de um site e passam.
-  void allow_origins(httplib::Server& svr, std::vector<std::string> origins)
+  void allow_origins(httplib::Server& svr)
   {
-    svr.set_pre_routing_handler([origins](const httplib::Request& req, httplib::Response& res)
+    svr.set_pre_routing_handler([](const httplib::Request& req, httplib::Response& res)
     {
       if (!req.has_header("Origin")) return httplib::Server::HandlerResponse::Unhandled;
 
       const std::string origin = req.get_header_value("Origin");
-      if (std::find(origins.begin(), origins.end(), origin) == origins.end())
+      if (!is_allowed_origin(origin))
       {
         res.status = 403;
         return httplib::Server::HandlerResponse::Handled;
@@ -68,7 +91,7 @@ bool ServerApp::start()
     return false;
   }
 
-  allow_origins(m_svr, config.origins());
+  allow_origins(m_svr);
   log_responses(m_svr);
   register_routes(m_svr);
 

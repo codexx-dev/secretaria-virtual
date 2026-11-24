@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { after, before, describe, test } from "node:test";
 
-import { ALLOWED_ORIGIN, startServer } from "./server.mjs";
+import { BUILD_ORIGINS, startServer } from "./server.mjs";
 
 const SRC = "TRANSPORTE ESCOLAR/ALUNOS";
 
@@ -99,33 +99,36 @@ describe("CORS", () => {
   const ping = (origin, method = "GET") =>
     fetch(`${server.url}/api/ping`, { method, headers: { Origin: origin, "Access-Control-Request-Method": "PUT" } });
 
-  test("aceita a origem permitida, inclusive no preflight", async () => {
-    const res = await ping(ALLOWED_ORIGIN);
-    assert.equal(res.status, 200);
-    assert.equal(res.headers.get("access-control-allow-origin"), ALLOWED_ORIGIN);
+  test("aceita as origens do origins.txt e localhost em qualquer porta, inclusive no preflight", async () => {
+    for (const origin of [...BUILD_ORIGINS, "http://localhost:5173", "http://127.0.0.1"]) {
+      const res = await ping(origin);
+      assert.equal(res.status, 200, origin);
+      assert.equal(res.headers.get("access-control-allow-origin"), origin);
+    }
 
-    const preflight = await ping(ALLOWED_ORIGIN, "OPTIONS");
+    const preflight = await ping("http://localhost:3000", "OPTIONS");
     assert.equal(preflight.status, 204);
     assert.match(preflight.headers.get("access-control-allow-methods"), /PUT/);
   });
 
-  test("recusa outras origens", async () => {
-    assert.equal((await ping("https://outro-site.example")).status, 403);
+  test("recusa outras origens, inclusive as parecidas com localhost", async () => {
+    for (const origin of ["https://outro-site.example", "http://localhost.outro-site.example"])
+      assert.equal((await ping(origin)).status, 403, origin);
   });
 });
 
 describe("config.json na inicializacao", () => {
-  test("opcoes ausentes sao completadas com o padrao e gravadas", async () => {
+  test("opcao ausente e completada com o padrao e opcao antiga e removida", async () => {
     const s = await startServer({
       editConfig: (c) => {
         delete c.usuario;
-        delete c.origins;
+        c.origins = ["https://outro-site.example"]; // saiu do config.json
       },
     });
     try {
       const saved = JSON.parse(await readFile(s.configFile, "utf8"));
       assert.equal(saved.usuario, "default");
-      assert.deepEqual(saved.origins, [ALLOWED_ORIGIN]);
+      assert.equal(saved.origins, undefined);
     } finally {
       await s.stop();
     }

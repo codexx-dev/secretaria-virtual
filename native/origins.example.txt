@@ -1,0 +1,8 @@
+# Origens (sites) que podem chamar a API do nat_comp pelo navegador (CORS).
+# Copie este arquivo para native/origins.txt, que fica fora do git e e lido
+# pelo CMake no build.
+#
+# Uma origem por linha: esquema, host e porta, sem caminho.
+# Linhas vazias e linhas que comecam com # sao ignoradas.
+# localhost e 127.0.0.1 sao sempre aceitos e nao precisam estar aqui.
+https://codexx-dev.github.io

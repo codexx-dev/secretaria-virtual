@@ -16,11 +16,9 @@ namespace
   constexpr const char* KEY_DATA_DIR = "dados";
   constexpr const char* KEY_PORT     = "porta";
   constexpr const char* KEY_USER     = "usuario";
-  constexpr const char* KEY_ORIGINS  = "origins";
 
   constexpr int DEFAULT_PORT = 8080;
   constexpr const char* DEFAULT_USER = "default";
-  constexpr const char* DEFAULT_ORIGIN = "https://codexx-dev.github.io";
 
   bool is_valid_port(int port) { return port > 0 && port <= 65535; }
 
@@ -33,15 +31,6 @@ namespace
     if (!is_within(dir, get_user_dir()) && !is_network_path(dir)) return false;
     return can_read_write(dir);
   }
-
-  // Uma origem e so esquema, host e porta: "https://site.com/app/" -> "https://site.com".
-  std::string to_origin(std::string url)
-  {
-    const size_t host = url.find("://");
-    const size_t path = url.find('/', host == std::string::npos ? 0 : host + 3);
-    if (path != std::string::npos) url.erase(path);
-    return url;
-  }
 }  // namespace
 
 ServerConfig& ServerConfig::get_instance()
@@ -52,7 +41,7 @@ ServerConfig& ServerConfig::get_instance()
 
 ServerConfig::ServerConfig()
   : m_data_dir(get_default_data_dir()), m_port(DEFAULT_PORT),
-    m_user(DEFAULT_USER), m_origins{DEFAULT_ORIGIN}
+    m_user(DEFAULT_USER)
 {
   const fs::path install_dir = get_install_dir();
   if (install_dir.empty())
@@ -112,19 +101,8 @@ bool ServerConfig::load()
   else
     valid = false;
 
-  it = doc.FindMember(KEY_ORIGINS);
-  if (it != doc.MemberEnd() && it->value.IsArray())
-  {
-    m_origins.clear();
-    for (const json::Value& v : it->value.GetArray())
-    {
-      if (!v.IsString() || v.GetStringLength() == 0) { valid = false; continue; }
-      m_origins.push_back(to_origin(v.GetString()));
-      if (m_origins.back() != v.GetString()) valid = false;   // tinha caminho: grava so a origem
-    }
-  }
-  else
-    valid = false;
+  // Chave a mais (ex.: "origins", que saiu do arquivo): regrava sem ela.
+  if (doc.MemberCount() != 3) valid = false;
 
   return valid;
 }
@@ -142,10 +120,6 @@ bool ServerConfig::save() const
   writer.Int(m_port);
   writer.Key(KEY_USER);
   writer.String(m_user);
-  writer.Key(KEY_ORIGINS);
-  writer.StartArray();
-  for (const std::string& origin : m_origins) writer.String(origin);
-  writer.EndArray();
   writer.EndObject();
 
   return write_byte(m_file, std::string_view(buf.GetString(), buf.GetSize()));

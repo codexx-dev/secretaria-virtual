@@ -5,11 +5,15 @@ build
 .vercel
 .netlify
 .vinxi
+.env
 app.config.timestamp_*.js
 
 # Environment
 .env
 .env*.local
+
+# Origens permitidas do nat_comp (ver native/origins.example.txt)
+/native/origins.txt
 
 # dependencies
 /node_modules

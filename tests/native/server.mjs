@@ -5,13 +5,17 @@
 // temporaria, que e apagada no stop().
 
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
-export const ALLOWED_ORIGIN = "https://codexx-dev.github.io";
+// Origens aceitas no build: as de native/origins.txt (mesmas regras do CMake).
+export const BUILD_ORIGINS = readFileSync(resolve("native/origins.txt"), "utf8")
+  .split(/\r?\n/)
+  .map((line) => line.trim().toLowerCase().replace(/\/+$/, ""))
+  .filter((line) => line && !line.startsWith("#"));
 
 const EXE = process.env.NAT_COMP_EXE ?? resolve("build/nat_comp_win10.exe");
 
@@ -35,7 +39,7 @@ export async function startServer({ editConfig = () => {} } = {}) {
   await mkdir(dataDir, { recursive: true });
 
   const port = await freePort();
-  const config = { dados: dataDir, porta: port, usuario: "teste", origins: [ALLOWED_ORIGIN] };
+  const config = { dados: dataDir, porta: port, usuario: "teste" };
   editConfig(config);
   const configFile = join(installDir, "config.json");
   await writeFile(configFile, JSON.stringify(config));

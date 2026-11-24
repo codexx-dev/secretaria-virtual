@@ -1,4 +1,39 @@
 cmake_minimum_required(VERSION 3.20)
+
+# ----------------------------------------------------------------------------
+# Origens permitidas (CORS): lidas de native/origins.txt, que fica fora do git,
+# e entregues ao codigo pela definicao -DNAT_COMP_ORIGINS="https://a","https://b".
+# localhost e 127.0.0.1 ficam no proprio codigo. Fica antes do project() para
+# falhar logo, sem detectar o compilador.
+# ----------------------------------------------------------------------------
+set(ORIGINS_FILE ${CMAKE_CURRENT_SOURCE_DIR}/origins.txt CACHE FILEPATH "Arquivo com as origens permitidas")
+
+if(NOT EXISTS ${ORIGINS_FILE})
+  message(FATAL_ERROR
+    "Arquivo de origens nao encontrado: ${ORIGINS_FILE}\n"
+    "Ele lista os sites que podem chamar a API pelo navegador (CORS) e fica fora "
+    "do git, por isso precisa ser criado em cada maquina. Copie "
+    "native/origins.example.txt para native/origins.txt e ajuste a lista.")
+endif()
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${ORIGINS_FILE})   # refaz ao mudar
+
+file(STRINGS ${ORIGINS_FILE} ORIGIN_LINES)
+set(ORIGINS "")
+foreach(origin IN LISTS ORIGIN_LINES)
+  string(STRIP "${origin}" origin)
+  if(origin STREQUAL "" OR origin MATCHES "^#")
+    continue()
+  endif()
+  string(TOLOWER "${origin}" origin)
+  string(REGEX REPLACE "/+$" "" origin "${origin}")
+  if(NOT origin MATCHES "^https?://[a-z0-9.-]+(:[0-9]+)?$")
+    message(FATAL_ERROR "Origem invalida em ${ORIGINS_FILE}: \"${origin}\"\n"
+      "Use esquema, host e porta, sem caminho (ex.: https://site.com).")
+  endif()
+  string(APPEND ORIGINS "\"${origin}\",")
+endforeach()
+message(STATUS "Origens permitidas: ${ORIGINS} localhost, 127.0.0.1")
+
 project(nat_comp VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -55,6 +90,7 @@ set(NAT_COMP_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${rapidjson_SOURCE_DIR}/in
 set(NAT_COMP_DEFINITIONS
   RAPIDJSON_HAS_STDSTRING=1                 # std::string direto no rapidjson
   NAT_COMP_VERSION="${PROJECT_VERSION}"     # versao no log
+  NAT_COMP_ORIGINS=${ORIGINS}               # origens de origins.txt (CORS)
 )
 
 # Log: sempre em <instalacao>/log.txt. Com LOG_TO_CONSOLE=ON tambem no console;

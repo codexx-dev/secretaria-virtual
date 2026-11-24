@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <mutex>
 #include <string>
-#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -24,7 +23,6 @@ private:
   fs::path m_data_dir;
   int m_port;
   std::string m_user;                   // UTF-8
-  std::vector<std::string> m_origins;   // ex.: "https://site.com"
 
   ServerConfig();
   bool load();
@@ -41,7 +39,6 @@ public:
   fs::path data_dir() const                { std::lock_guard<std::mutex> lock(m_mutex); return m_data_dir; }
   int port() const                         { std::lock_guard<std::mutex> lock(m_mutex); return m_port; }
   std::string user() const                 { std::lock_guard<std::mutex> lock(m_mutex); return m_user; }
-  std::vector<std::string> origins() const { std::lock_guard<std::mutex> lock(m_mutex); return m_origins; }
 
   // Valida, grava no arquivo e, se der certo, passa a valer na memoria.
   // A pasta de dados precisa existir, ficar na pasta do usuario ou na rede e
