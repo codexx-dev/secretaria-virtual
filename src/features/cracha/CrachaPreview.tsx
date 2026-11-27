@@ -1,4 +1,4 @@
-import { Index } from "solid-js";
+import { For } from "solid-js";
 
 import { IconCidadeEducadora } from "~/components/brands/IconCidadeEducadora";
 import IconSantos from "~/components/brands/IconSantos";
@@ -46,14 +46,14 @@ export function CrachaPreview() {
           <h2 class="text-center">Autorizados a buscar no ponto:</h2>
 
           <ol class="list-decimal list-inside text-left *:my-2 text-[9pt]">
-            <Index each={Array.from({ length: 7 })}>
+            <For each={Array.from({ length: 7 })} keyed={false}>
               {(_, i) => (
                 <li>
                   hello
                   <hr class="ml-3"></hr>
                 </li>
               )}
-            </Index>
+            </For>
           </ol>
 
           <h2>Telefones:</h2>

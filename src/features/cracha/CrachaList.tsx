@@ -25,7 +25,7 @@ export function CrachaList(props: CrachaListProps) {
       items={props.crachasInfo}
       columns={columns}
       actions={() => (
-        <Button class="px-4" size="sm" onclick={() => console.log("ok")}>
+        <Button class="px-4" size="sm" onClick={() => console.log("ok")}>
           Editar
         </Button>
       )}

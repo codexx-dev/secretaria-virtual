@@ -4,28 +4,29 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "vite",
     "build": "vite build",
-    "start": "node .output/server/index.mjs",
     "preview": "npx serve .output/public",
     "format": "prettier --write src",
     "format:check": "prettier --check src",
     "test": "node --test \"tests/**/*.test.mjs\""
   },
   "dependencies": {
-    "@solidjs/router": "^1.0.0",
-    "@solidjs/start": "^2.2.1",
+    "@solidjs/router": "^2.0.1",
+    "@solidjs/web": "^2.0.4",
     "nitro": "^3.0.261103-rc",
-    "solid-js": "^1.9.14",
+    "solid-js": "^2.0.4",
     "vite": "^8.0.0"
   },
   "devDependencies": {
+    "@solidjs/vite-plugin": "^3.0.1",
     "@tailwindcss/vite": "^4.0.7",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/node": "^24.19.4",
+    "filesystem-routing": "^0.5.0",
     "prettier": "^3.9.10",
     "tailwind-merge": "^3.7.0",
-    "tailwindcss": "^4.0.7",
-    "vite-plugin-solid-svg": "^0.8.1"
+    "tailwindcss": "^4.0.7"
   },
   "engines": {
     "node": ">=24"

@@ -51,7 +51,7 @@ export function CrachaHeader() {
       </Field>
 
       <Field label="Ano" class="shrink-0">
-        <Input type="number" inputMode="numeric" value={currentYear()} />
+        <Input type="number" inputmode="numeric" value={currentYear()} />
       </Field>
 
       <Field label="Pesquisar" class="min-w-0 flex-1">

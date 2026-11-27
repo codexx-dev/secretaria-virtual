@@ -1,11 +1,16 @@
-import { JSX, splitProps } from "solid-js";
+import { omit } from "solid-js";
+
+import type { JSX } from "@solidjs/web";
 
 import { twMerge } from "tailwind-merge";
 
 import { useField } from "../forms/Field";
 
-type FileInputProps = JSX.InputHTMLAttributes<HTMLInputElement> & {
-  //nada ;)
+type FileInputProps = Omit<
+  JSX.InputHTMLAttributes<HTMLInputElement>,
+  "class"
+> & {
+  class?: string;
 };
 
 export const baseClass =
@@ -14,15 +19,15 @@ export const baseClass =
   "file:text-blue-700 hover:file:bg-blue-100 disabled:cursor-not-allowed";
 
 export function FileInput(props: FileInputProps) {
-  const [local, rest] = splitProps(props, ["class", "id"]);
+  const rest = omit(props, "class", "id");
   const field = useField();
 
   return (
     <input
       type="file"
       {...rest}
-      id={local.id ?? field?.id}
-      class={twMerge(baseClass, local.class ?? "")}
+      id={props.id ?? field?.id}
+      class={twMerge(baseClass, props.class ?? "")}
     />
   );
 }

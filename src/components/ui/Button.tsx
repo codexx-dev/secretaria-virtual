@@ -1,11 +1,17 @@
-import { type JSX, splitProps } from "solid-js";
+import { omit } from "solid-js";
+
+import type { JSX } from "@solidjs/web";
 
 import { twMerge } from "tailwind-merge";
 
 type Variant = "primary" | "secondary" | "outline" | "ghost" | "danger";
 type Size = "sm" | "default" | "lg" | "icon";
 
-type ButtonProps = JSX.ButtonHTMLAttributes<HTMLButtonElement> & {
+type ButtonProps = Omit<
+  JSX.ButtonHTMLAttributes<HTMLButtonElement>,
+  "class"
+> & {
+  class?: string;
   variant?: Variant;
   size?: Size;
 };
@@ -13,14 +19,12 @@ type ButtonProps = JSX.ButtonHTMLAttributes<HTMLButtonElement> & {
 const variants: Record<Variant, string> = {
   primary:
     "bg-blue-600 text-white shadow-sm hover:bg-blue-500 active:bg-blue-700",
-  secondary:
-    "bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300",
+  secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300",
   outline:
     "border border-slate-300/40 text-slate-100 hover:bg-slate-100/10 active:bg-slate-100/15",
   ghost:
     "text-slate-300 hover:bg-slate-100/10 hover:text-slate-100 active:bg-slate-100/15",
-  danger:
-    "bg-red-600 text-white shadow-sm hover:bg-red-500 active:bg-red-700",
+  danger: "bg-red-600 text-white shadow-sm hover:bg-red-500 active:bg-red-700",
 };
 
 const sizes: Record<Size, string> = {
@@ -31,7 +35,7 @@ const sizes: Record<Size, string> = {
 };
 
 export default function Button(props: ButtonProps) {
-  const [local, rest] = splitProps(props, ["class", "children"]);
+  const rest = omit(props, "class", "children");
 
   return (
     <button
@@ -45,10 +49,10 @@ export default function Button(props: ButtonProps) {
         "disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100",
         sizes[props.size ?? "default"],
         variants[props.variant ?? "primary"],
-        local.class,
+        props.class,
       )}
     >
-      {local.children}
+      {props.children}
     </button>
   );
 }

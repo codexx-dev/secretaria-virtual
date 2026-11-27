@@ -1,5 +1,3 @@
-import { A } from "@solidjs/router";
-
 export default function About() {
   return (
     <main class="text-center mx-auto text-gray-700 p-4">
@@ -18,9 +16,9 @@ export default function About() {
         to learn how to build Solid apps.
       </p>
       <p class="my-4">
-        <A href="/" class="text-sky-600 hover:underline">
+        <a href="/" class="text-sky-600 hover:underline">
           Home
-        </A>
+        </a>
         {" - "}
         <span>About Page</span>
       </p>

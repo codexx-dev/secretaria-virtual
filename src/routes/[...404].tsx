@@ -1,5 +1,3 @@
-import { A } from "@solidjs/router";
-
 export default function NotFound() {
   return (
     <main class="text-center mx-auto text-gray-700 p-4">
@@ -18,13 +16,13 @@ export default function NotFound() {
         to learn how to build Solid apps.
       </p>
       <p class="my-4">
-        <A href="/" class="text-sky-600 hover:underline">
+        <a href="/" class="text-sky-600 hover:underline">
           Home
-        </A>
+        </a>
         {" - "}
-        <A href="/about" class="text-sky-600 hover:underline">
+        <a href="/about" class="text-sky-600 hover:underline">
           About Page
-        </A>
+        </a>
       </p>
     </main>
   );

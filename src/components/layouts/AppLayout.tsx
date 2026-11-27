@@ -1,4 +1,4 @@
-import { JSX } from "solid-js";
+import type { JSX } from "@solidjs/web";
 
 import { appStyle } from "~/app";
 import InfoIcon from "~/assets/info.svg";
@@ -24,7 +24,7 @@ export function AppLayout(props: AppLayoutProps) {
 
         <div class="absolute mx-5 bottom-0 right-0 text-lg hover:underline flex flex-row gap-5">
           <a class="flex gap-1" href="/sobre">
-            {InfoIcon}
+            <InfoIcon />
             Sobre...
           </a>
         </div>

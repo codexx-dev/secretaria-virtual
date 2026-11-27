@@ -1,7 +1,9 @@
-import { Suspense } from "solid-js";
+import { Loading } from "solid-js";
 
-import { Router } from "@solidjs/router";
-import { FileRoutes } from "@solidjs/start/router";
+import { createRouter } from "@solidjs/router";
+import { fileRoutes } from "@solidjs/router/fs";
+
+import { pageRoutes } from "virtual:file-routes";
 
 import "./app.css";
 
@@ -13,13 +15,8 @@ export const appStyle = {
   borderCol1: "border-slate-300",
 };
 
+const Router = createRouter({ routes: fileRoutes(pageRoutes) });
+
 export default function App() {
-  return (
-    <Router
-      root={(props) => (
-        <Suspense>{props.children}</Suspense>
-      )}>
-      <FileRoutes/>
-    </Router>
-  );
+  return <Router>{(props) => <Loading>{props.children}</Loading>}</Router>;
 }

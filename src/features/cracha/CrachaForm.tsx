@@ -1,5 +1,6 @@
-import { Show, createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { Show, createSignal, createStore } from "solid-js";
+
+import type { JSX } from "@solidjs/web";
 
 import Button from "~/components/ui/Button";
 import { EditableSelect } from "~/components/ui/controls/EditableSelect";
@@ -23,21 +24,36 @@ type CrachaFormProps = {
 };
 
 export default function CrachaForm(props: CrachaFormProps) {
-  const [values, setValues] = createStore<CrachaFormValues>({
-    nome: props.initialValues?.nome ?? "",
-    cargo: props.initialValues?.cargo ?? "",
-    setor: props.initialValues?.setor ?? "",
-    matricula: props.initialValues?.matricula ?? "",
-    foto: props.initialValues?.foto ?? null,
-  });
+  const [values, setValues] = createStore<CrachaFormValues>(
+    (draft) => {
+      draft.nome = props.initialValues?.nome ?? "";
+      draft.cargo = props.initialValues?.cargo ?? "";
+      draft.setor = props.initialValues?.setor ?? "";
+      draft.matricula = props.initialValues?.matricula ?? "";
+      draft.foto = props.initialValues?.foto ?? null;
+    },
+    { nome: "", cargo: "", setor: "", matricula: "", foto: null },
+  );
+
+  const setText = (
+    key: "nome" | "cargo" | "setor" | "matricula",
+    value: string,
+  ) =>
+    setValues((draft) => {
+      draft[key] = value;
+    });
   const [previewUrl, setPreviewUrl] = createSignal<string | null>(null);
 
   const handleFoto = (event: Event & { currentTarget: HTMLInputElement }) => {
     const file = event.currentTarget.files?.[0] ?? null;
-    setValues("foto", file);
+    setValues((draft) => {
+      draft.foto = file;
+    });
   };
 
-  const handleSubmit = async (event: SubmitEvent) => {
+  const handleSubmit: JSX.EventHandler<HTMLFormElement, SubmitEvent> = (
+    event,
+  ) => {
     event.preventDefault();
   };
 
@@ -55,7 +71,7 @@ export default function CrachaForm(props: CrachaFormProps) {
         <Input
           placeholder="Maria da Silva"
           value={values.nome}
-          onInput={(e) => setValues("nome", e.currentTarget.value)}
+          onInput={(e) => setText("nome", e.currentTarget.value)}
         />
       </Field>
 
@@ -64,7 +80,7 @@ export default function CrachaForm(props: CrachaFormProps) {
           <Input
             placeholder="1º ANO"
             value={values.cargo}
-            onInput={(e) => setValues("cargo", e.currentTarget.value)}
+            onInput={(e) => setText("cargo", e.currentTarget.value)}
           />
         </Field>
 
@@ -72,7 +88,7 @@ export default function CrachaForm(props: CrachaFormProps) {
           <Input
             placeholder="2026"
             value={values.setor}
-            onInput={(e) => setValues("setor", e.currentTarget.value)}
+            onInput={(e) => setText("setor", e.currentTarget.value)}
           />
         </Field>
       </div>
@@ -82,7 +98,7 @@ export default function CrachaForm(props: CrachaFormProps) {
           inputmode="numeric"
           placeholder="000123"
           value={values.matricula}
-          onInput={(e) => setValues("matricula", e.currentTarget.value)}
+          onInput={(e) => setText("matricula", e.currentTarget.value)}
         />
       </Field>
 

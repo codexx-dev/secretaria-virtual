@@ -1,9 +1,10 @@
-import CrachaForm from "~/features/cracha/CrachaForm";
+import { AppLayout } from "~/components/layouts/AppLayout";
+import { HomeScreen } from "~/features/home/HomeScreen";
 
 export default function Home() {
   return (
-    <div>
-      <CrachaForm onSubmit={()=>{}}/>
-    </div>
+    <AppLayout>
+      <HomeScreen />
+    </AppLayout>
   );
 }

@@ -1,4 +1,6 @@
-import { For, JSX, createMemo, createSignal } from "solid-js";
+import { For, createMemo, createSignal } from "solid-js";
+
+import type { JSX } from "@solidjs/web";
 
 import { twMerge } from "tailwind-merge";
 

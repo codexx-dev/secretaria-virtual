@@ -1,4 +1,6 @@
-import { For, JSX, Show, createSignal, splitProps } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
+
+import type { JSX } from "@solidjs/web";
 
 import { twMerge } from "tailwind-merge";
 
@@ -7,14 +9,18 @@ import EditIcon from "~/assets/edit.svg";
 
 import Button from "../Button";
 import { useField } from "../forms/Field";
-import { baseClass, Input } from "./Input";
+import { Input, baseClass } from "./Input";
 
-type EditableSelectProps = JSX.SelectHTMLAttributes<HTMLSelectElement> & {
+type EditableSelectProps = Omit<
+  JSX.SelectHTMLAttributes<HTMLSelectElement>,
+  "class"
+> & {
+  class?: string;
   options?: Array<string>;
 };
 
 export function EditableSelect(props: EditableSelectProps) {
-  const [options, setOptions] = createSignal([...(props.options ?? "")]);
+  const [options] = createSignal(() => [...(props.options ?? [])]);
   const [isOpen, setIsOpen] = createSignal(false);
   const field = useField();
 
@@ -31,7 +37,7 @@ export function EditableSelect(props: EditableSelectProps) {
         id={props.id ?? field?.id}
         class={twMerge(baseClass, "flex justify-between")}
         disabled={props.disabled}
-        aria-expanded={isOpen()}
+        aria-expanded={isOpen() ? "true" : "false"}
         onClick={() => setIsOpen(!isOpen())}
       >
         <span class="text-gray-400">{"Selecione..."}</span>
@@ -46,17 +52,17 @@ export function EditableSelect(props: EditableSelectProps) {
                 <span>{"Selecione..."}</span>
 
                 <Button variant="secondary" size="icon" class="bg-transparent">
-                  {EditIcon}
+                  <EditIcon />
                 </Button>
               </div>
             )}
           </For>
 
           <div class="mt-1 flex items-center gap-1 border-t border-gray-200 pt-2">
-            <Input placeholder="Nova opção..."/>
+            <Input placeholder="Nova opção..." />
 
             <Button variant="primary" size="icon">
-              {AddIcon}
+              <AddIcon />
             </Button>
           </div>
         </div>

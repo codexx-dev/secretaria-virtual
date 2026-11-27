@@ -1,16 +1,15 @@
-import { children, JSX } from "solid-js";
+import type { JSX } from "@solidjs/web";
 
 type PaperPageProps = {
-  orientation: "vertical" | "horizontal"
-  size: "a4" | "a3" | "letter" | "oficio"
+  orientation: "vertical" | "horizontal";
+  size: "a4" | "a3" | "letter" | "oficio";
   children?: JSX.Element;
-}
+};
 
-export function PaperPage(props: PaperPageProps){
-
+export function PaperPage(props: PaperPageProps) {
   const getWidth = () => {
-    if(props.orientation === "horizontal"){
-      switch(props.size){
+    if (props.orientation === "horizontal") {
+      switch (props.size) {
         case "a4":
           return "297mm";
         case "a3":
@@ -20,8 +19,8 @@ export function PaperPage(props: PaperPageProps){
         case "oficio":
           return "356mm";
       }
-    }else{
-      switch(props.size){
+    } else {
+      switch (props.size) {
         case "a4":
           return "210mm";
         case "a3":
@@ -32,11 +31,11 @@ export function PaperPage(props: PaperPageProps){
           return "216mm";
       }
     }
-  }
+  };
 
   const getHeight = () => {
-    if(props.orientation === "vertical"){
-      switch(props.size){
+    if (props.orientation === "vertical") {
+      switch (props.size) {
         case "a4":
           return "297mm";
         case "a3":
@@ -45,9 +44,9 @@ export function PaperPage(props: PaperPageProps){
           return "279mm";
         case "oficio":
           return "356mm";
-      } 
-    }else{
-      switch(props.size){
+      }
+    } else {
+      switch (props.size) {
         case "a4":
           return "210mm";
         case "a3":
@@ -58,10 +57,10 @@ export function PaperPage(props: PaperPageProps){
           return "216mm";
       }
     }
-  }
+  };
 
-  return(
-    <div class="bg-white" style={{width: getWidth(), height: getHeight()}}>
+  return (
+    <div class="bg-white" style={{ width: getWidth(), height: getHeight() }}>
       {props.children}
     </div>
   );
